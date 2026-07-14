@@ -4,10 +4,6 @@ import ProtectedRoute from './components/ProtectedRoute';
 import OverviewScreen from './pages/OverviewScreen';
 
 function App() {
-
- 
-
-
   return (
     <Routes>
       <Route path='/login' element={<LoginScreen/>}/>
