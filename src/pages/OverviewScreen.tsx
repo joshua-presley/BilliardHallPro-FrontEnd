@@ -6,6 +6,7 @@ import { IconLogout } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
 import TableOverview from '../components/TableOverview';
 import { getTables } from '../api/table';
+import NewSessionModal from '../components/NewSessionModal';
 
 type SidebarSection = 'tables' | 'playerQueue';
 
@@ -16,6 +17,8 @@ function OverviewScreen() {
   const [selectedTable, setSelectedTable] = useState<Table | null>(null);
   const [isLoading, setIsLoading] = useState(false)
   const [tables, setTables] = useState<Table[]>([])
+  const [newSessionModalOpen, setNewSessionModalOpen] = useState(false);
+
   const navigate = useNavigate()
 
   /**
@@ -54,6 +57,12 @@ function OverviewScreen() {
       }
 
   }
+
+
+  const handleSessionCreated = (updatedTable: Table) => {
+    setTables((prev) => prev.map((t) => (t.id === updatedTable.id ? updatedTable : t)));
+    setSelectedTable(updatedTable); // keep drawer in sync if it's still open
+  };
 
   return (
     <AppShell navbar={{ width: 220, breakpoint: 'sm' }} padding="md">
@@ -123,7 +132,7 @@ function OverviewScreen() {
               <strong>Status:</strong>{' '}
               {selectedTable.current_session ? 'Occupied' : 'Available'}
             </Text>
-            {selectedTable.current_session && (
+            {selectedTable.current_session ? (
               <>
                 <Text>
                   <strong>Session type:</strong> {selectedTable.current_session.session_type}
@@ -138,10 +147,26 @@ function OverviewScreen() {
                   <strong>Current charge:</strong> ${selectedTable.current_session.charge}
                 </Text>
               </>
+            ): (
+              <Button mt="md" onClick={() => setNewSessionModalOpen(true)}>
+                New Session
+              </Button>
             )}
           </Stack>
         )}
       </Drawer>
+
+      {selectedTable && (
+        <NewSessionModal
+          opened={newSessionModalOpen}
+          onClose={() => setNewSessionModalOpen(false)}
+          table={selectedTable}
+          onSessionCreated={(updatedTable) => {
+            handleSessionCreated(updatedTable);
+            setNewSessionModalOpen(false);
+          }}
+        />
+      )}
     </AppShell>
   );
 }
