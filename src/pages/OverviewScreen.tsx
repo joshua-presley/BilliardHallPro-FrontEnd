@@ -8,6 +8,7 @@ import TableOverview from '../components/TableOverview';
 import { getTables } from '../api/table';
 import NewSessionModal from '../components/NewSessionModal';
 import { formatStartTime } from '../helpers/formatHelpers';
+import { useTranslation } from 'react-i18next';
 
 type SidebarSection = 'tables' | 'playerQueue';
 
@@ -26,6 +27,7 @@ function OverviewScreen() {
   const [newSessionModalOpen, setNewSessionModalOpen] = useState(false);
 
   const navigate = useNavigate()
+  const { t } = useTranslation()
 
   /**
    * fetch data from the back end.
@@ -73,15 +75,15 @@ function OverviewScreen() {
   return (
     <AppShell navbar={{ width: 220, breakpoint: 'sm' }} padding="md">
       <AppShell.Navbar p="md">
-        <Title order={4} mb="md">BilliardHallPro</Title>
+        <Title order={4} mb="md">{t("OverviewScreen.AppTitle")}</Title>
         <AppShell.Section grow>
           <NavLink
-            label="Tables"
+            label={t("OverviewScreen.Tables")}
             active={activeSection === 'tables'}
             onClick={() => setActiveSection('tables')}
           />
           <NavLink
-            label="Player Queue"
+            label={t("OverviewScreen.PlayerQueue")}
             active={activeSection === 'playerQueue'}
             onClick={() => setActiveSection('playerQueue')}
           />
@@ -95,7 +97,7 @@ function OverviewScreen() {
             onClick={handleLogout}
             loading={isLoading}
           >
-            Logout
+            {t("Common.Logout")}
           </Button>
         </AppShell.Section>
       </AppShell.Navbar>
@@ -103,7 +105,7 @@ function OverviewScreen() {
       <AppShell.Main>
         {activeSection === 'tables' && (
           <>
-            <Title order={2} mb="md">Tables</Title>
+            <Title order={2} mb="md">{t("OverviewScreen.Tables")}</Title>
             <SimpleGrid cols={{ base: 1, sm: 2, md: 3, lg: 4 }} spacing="md">
               {tables.map((table) => (
                 <TableOverview table={table} onClick={() => setSelectedTable(table)} />
@@ -113,7 +115,7 @@ function OverviewScreen() {
         )}
 
         {activeSection === 'playerQueue' && (
-          <Title order={2}>Player Queue</Title>
+          <Title order={2}>{t("OverviewScreen.PlayerQueue")}</Title>
           // Placeholder — build PlayerQueue component later
         )}
       </AppShell.Main>
@@ -122,36 +124,36 @@ function OverviewScreen() {
         opened={selectedTable !== null}
         onClose={handleCloseDetail}
         position="right"
-        title={selectedTable?.name ?? 'Table Detail'}
+        title={selectedTable?.name ?? t("OverviewScreen.TableDetails")}
         size="md"
       >
         {selectedTable && (
           <Stack>
             <Text>
-              <strong>Type:</strong> {selectedTable.table_type.replace('_', ' ')}
+              <strong>{t("OverviewScreen.Type")}:</strong> {selectedTable.table_type.replace('_', ' ')}
             </Text>
             <Text>
-              <strong>Max players:</strong> {selectedTable.max_players}
+              <strong>{t("OverviewScreen.MaxPlayers")}:</strong> {selectedTable.max_players}
             </Text>
             <Text>
               <strong>Status:</strong>{' '}
-              {selectedTable.current_session ? 'Occupied' : 'Available'}
+              {selectedTable.current_session ? t("OverviewScreen.Occupied") : t("OverviewScreen.Available")}
             </Text>
             {selectedTable.current_session ? (
               <>
                 <Text>
-                  <strong>Session type:</strong> {selectedTable.current_session.session_type}
+                  <strong>{t("OverviewScreen.SessionType")}:</strong> {selectedTable.current_session.session_type}
                 </Text>
                 <Text>
-                  <strong>Started:</strong> { formatStartTime(selectedTable.current_session.started_at) }
+                  <strong>{t("OverviewScreen.Started")}:</strong> { formatStartTime(selectedTable.current_session.started_at) }
                 </Text>
                 <Text>
-                  <strong>Rate:</strong> ${selectedTable.current_session.rate}/hr
+                  <strong>{t("OverviewScreen.Rate")}:</strong> ${selectedTable.current_session.rate}/hr
                 </Text>
               </>
             ): (
               <Button mt="md" onClick={() => setNewSessionModalOpen(true)}>
-                New Session
+                {t("OverviewScreen.NewSession")}
               </Button>
             )}
           </Stack>

@@ -7,6 +7,7 @@ import type { SessionType } from '../types/models/enums';
 import type { Player } from '../types/models/Player';
 import { searchPlayers } from '../api/player';
 import { createSession } from '../api/session';
+import { useTranslation } from 'react-i18next';
 
 
 interface NewSessionModalProps {
@@ -42,6 +43,8 @@ function NewSessionModal({ opened, onClose, table, onSessionCreated }: NewSessio
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const { t } = useTranslation()
+
   useEffect(() => {
     if (!debouncedSearch.trim()) {
       setMemberOptions([]);
@@ -75,8 +78,8 @@ function NewSessionModal({ opened, onClose, table, onSessionCreated }: NewSessio
     if (playerCount === null) {
       notifications.show({
         color: 'red',
-        title: 'Missing information',
-        message: 'Please select the number of players.',
+        title: t("NewSessionModal.MissingInformationTitle"),
+        message: t("NewSessionModal.MissingInformationMessage"),
       });
       return;
     }
@@ -97,8 +100,8 @@ function NewSessionModal({ opened, onClose, table, onSessionCreated }: NewSessio
 
       notifications.show({
         color: 'green',
-        title: 'Session started',
-        message: `${table.name} — ${playerCount} player(s), ${GAME_TYPE_OPTIONS.find((g) => g.value === gameType)?.label}.`,
+        title: t("NewSessionModal.SessionStartedTitle"),
+        message: t("NewSessionModal.SessionStartedMessage", {tableName: table.name, playerCount: playerCount, gameTypeLabel: GAME_TYPE_OPTIONS.find((g) => g.value === gameType)?.label}),
       });
 
       onSessionCreated({ ...table, current_session: session });
@@ -107,8 +110,8 @@ function NewSessionModal({ opened, onClose, table, onSessionCreated }: NewSessio
     } catch (err) {
       notifications.show({
         color: 'red',
-        title: 'Something went wrong',
-        message: 'Could not create the session. Please try again',
+        title: t("Common.ErrorTitle"),
+        message: t("NewSessionModal.SessionCreateErrorMessage"),
         onClose: () => setIsSubmitting(false)
       });
     }
@@ -124,7 +127,7 @@ function NewSessionModal({ opened, onClose, table, onSessionCreated }: NewSessio
       <Stack>
         <div>
           <Text size="sm" fw={500} mb="xs">
-            Number of Players
+            {t("NewSessionModal.NumPlayers")}
           </Text>
           <SimpleGrid cols={Math.min(table.max_players, 6)} spacing="xs">
             {Array.from({ length: table.max_players }, (_, i) => i + 1).map((n) => (
@@ -141,7 +144,7 @@ function NewSessionModal({ opened, onClose, table, onSessionCreated }: NewSessio
 
         <div>
           <Text size="sm" fw={500} mb="xs">
-            Game Type
+            {t("NewSessionModal.GameType")}
           </Text>
           <SimpleGrid cols={2} spacing="xs">
             {GAME_TYPE_OPTIONS.map((option) => (
@@ -157,24 +160,24 @@ function NewSessionModal({ opened, onClose, table, onSessionCreated }: NewSessio
         </div>
 
         <MultiSelect
-          label="Member"
-          placeholder="Search by name or member number"
+          label={t("NewSessionModal.Member")}
+          placeholder={t("NewSessionModal.MemberSearchDescription")}
           searchable
           searchValue={memberSearch}
           onSearchChange={setMemberSearch}
           data={memberSelectData}
           value={selectedMemberIds}
           onChange={setSelectedMemberId}
-          nothingFoundMessage={isSearching ? 'Searching...' : 'No members found'}
+          nothingFoundMessage={isSearching ? t("NewSessionModal.Searching") + "..." : t("NewSessionModal.NoMembersFound")}
           clearable
         />
 
         <Group justify="flex-end" mt="md">
           <Button variant="default" onClick={handleCancel}>
-            Cancel
+            {t("Common.Cancel")}
           </Button>
           <Button onClick={handleCreate} loading={isSubmitting}>
-            Create
+            {t("Common.Create")}
           </Button>
         </Group>
       </Stack>
