@@ -1,18 +1,11 @@
 import { Card, Text, Group, Stack } from '@mantine/core';
 import type { Table } from '../types/models/Table';
 import PlayerBadge from './PlayerBadge';
+import { formatSessionType, formatStartTime } from '../helpers/formatHelpers';
 
 interface TableOverviewProps {
   table: Table;
   onClick?: (table: Table) => void;
-}
-
-function formatSessionType(sessionType: string): string {
-  return sessionType.charAt(0).toUpperCase() + sessionType.slice(1);
-}
-
-function formatStartTime(startedAt: string): string {
-  return new Date(startedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
 /**
@@ -41,7 +34,7 @@ function TableOverview(props: TableOverviewProps) {
         <Text fw={600}>{props.table.name}</Text>
         {session && (
           <Text size="sm" c="dimmed">
-            {session.players.length}/{props.table.max_players}
+            {session.player_count}/{props.table.max_players}
           </Text>
         )}
       </Group>

@@ -7,11 +7,17 @@ import { useNavigate } from 'react-router-dom';
 import TableOverview from '../components/TableOverview';
 import { getTables } from '../api/table';
 import NewSessionModal from '../components/NewSessionModal';
+import { formatStartTime } from '../helpers/formatHelpers';
 
 type SidebarSection = 'tables' | 'playerQueue';
 
-// Placeholder data — replace with real API data once TableGrid is built
-
+/**
+ * This screen shows an overview of the hall. It displays tables
+ * as a grid with information about their availability, or if they
+ * are occupied, it shows how long and how many players there are.
+ * 
+ * Also shows information about the player queue.
+ */
 function OverviewScreen() {
   const [activeSection, setActiveSection] = useState<SidebarSection>('tables');
   const [selectedTable, setSelectedTable] = useState<Table | null>(null);
@@ -98,7 +104,6 @@ function OverviewScreen() {
         {activeSection === 'tables' && (
           <>
             <Title order={2} mb="md">Tables</Title>
-            {/* Placeholder grid — swap for real TableGrid component later */}
             <SimpleGrid cols={{ base: 1, sm: 2, md: 3, lg: 4 }} spacing="md">
               {tables.map((table) => (
                 <TableOverview table={table} onClick={() => setSelectedTable(table)} />
@@ -138,13 +143,10 @@ function OverviewScreen() {
                   <strong>Session type:</strong> {selectedTable.current_session.session_type}
                 </Text>
                 <Text>
-                  <strong>Started:</strong> {selectedTable.current_session.started_at}
+                  <strong>Started:</strong> { formatStartTime(selectedTable.current_session.started_at) }
                 </Text>
                 <Text>
                   <strong>Rate:</strong> ${selectedTable.current_session.rate}/hr
-                </Text>
-                <Text>
-                  <strong>Current charge:</strong> ${selectedTable.current_session.charge}
                 </Text>
               </>
             ): (
