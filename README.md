@@ -37,12 +37,6 @@ VITE_API_BASE_URL=http://localhost:8000/api/
 
 If you haven't already wired `src/api/client.ts` to read from this variable, update it:
 
-```typescript
-const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
-  withCredentials: true,
-});
-```
 
 Add `.env` to `.gitignore` if it isn't already there — don't commit environment-specific config, especially once this points at staging/production URLs.
 
