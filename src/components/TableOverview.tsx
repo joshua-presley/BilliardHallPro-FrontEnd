@@ -2,6 +2,7 @@ import { Card, Text, Group, Stack } from '@mantine/core';
 import type { Table } from '../types/models/Table';
 import PlayerBadge from './PlayerBadge';
 import { formatSessionType, formatStartTime } from '../helpers/formatHelpers';
+import { useTranslation } from 'react-i18next';
 
 interface TableOverviewProps {
   table: Table;
@@ -14,6 +15,7 @@ interface TableOverviewProps {
  */
 function TableOverview(props: TableOverviewProps) {
   const session = props.table.current_session;
+  const { t } = useTranslation();
 
   return (
     <Card

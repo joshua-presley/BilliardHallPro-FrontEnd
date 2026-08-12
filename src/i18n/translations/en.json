@@ -1,0 +1,37 @@
+{
+    "Common": { 
+        "Logout": "Logout",
+        "Loading": "Loading",
+        "ErrorTitle": "Something went wrong",
+        "Cancel": "Cancel",
+        "Create": "Create"
+    },
+    "OverviewScreen": {
+        "AppTitle": "Billiard Hall Pro",
+        "Tables": "Tables",
+        "PlayerQueue": "Player Queue",
+        "TableDetails": "Table Details",
+        "Type": "Type",
+        "MaxPlayers": "Max Players",
+        "Status": "Status",
+        "Occupied": "Occupied",
+        "Available": "Available",
+        "SessionType": "Session Type",
+        "Started": "Started",
+        "Rate": "Rate",
+        "NewSession": "New Session"
+    },
+    "NewSessionModal": {
+        "MissingInformationTitle": "Missing Information",
+        "MissingInformationMessage": "Please select the number of players.",
+        "SessionStartedTitle": "Session Started",
+        "SessionStartedMessage": "{{tableName}} - {{playerCount}} player(s), {{gameTypeLabel}}",
+        "SessionCreateErrorMessage": "Could not create the session. Please try again.",
+        "NumPlayers": "Number of players",
+        "GameType": "Game Type",
+        "Member": "Member",
+        "MemberSearchDescription": "Search by name or member number",
+        "Searching": "Searching",
+        "NoMembersFound": "No members found"
+    }
+}
