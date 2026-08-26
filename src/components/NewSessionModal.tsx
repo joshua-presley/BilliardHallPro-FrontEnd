@@ -5,7 +5,7 @@ import { notifications } from '@mantine/notifications';
 import type { Table } from '../types/models/Table';
 import type { SessionType } from '../types/models/enums';
 import type { Player } from '../types/models/Player';
-import { getAllPlayers, searchPlayers } from '../api/player';
+import { getAllPlayers } from '../api/player';
 import { createSession } from '../api/session';
 import { useTranslation } from 'react-i18next';
 
@@ -54,17 +54,6 @@ function NewSessionModal({ opened, onClose, table, onSessionCreated }: NewSessio
         setMemberOptions(players)
       })
   }, [])
-
-  useEffect(() => {
-    if (!debouncedSearch.trim()) {
-      setMemberOptions(allMembers);
-      return;
-    }
-    setIsSearching(true);
-    searchPlayers(debouncedSearch)
-      .then(setMemberOptions)
-      .finally(() => setIsSearching(false));
-  }, [debouncedSearch, allMembers]);
 
   const resetForm = () => {
     setPlayerCount(null);
