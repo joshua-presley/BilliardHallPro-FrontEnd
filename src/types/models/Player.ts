@@ -3,6 +3,7 @@ export interface Player {
   first_name: string;
   last_name: string;
   phone_number: string;
+  member_number: number;
   email: string;
   created_at: string; // ISO 8601 datetime string
 }

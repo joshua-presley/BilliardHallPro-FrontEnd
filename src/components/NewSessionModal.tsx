@@ -5,7 +5,7 @@ import { notifications } from '@mantine/notifications';
 import type { Table } from '../types/models/Table';
 import type { SessionType } from '../types/models/enums';
 import type { Player } from '../types/models/Player';
-import { searchPlayers } from '../api/player';
+import { getAllPlayers, searchPlayers } from '../api/player';
 import { createSession } from '../api/session';
 import { useTranslation } from 'react-i18next';
 
@@ -38,6 +38,7 @@ function NewSessionModal({ opened, onClose, table, onSessionCreated }: NewSessio
   const [memberSearch, setMemberSearch] = useState('');
   const [debouncedSearch] = useDebouncedValue(memberSearch, 300);
   const [memberOptions, setMemberOptions] = useState<Player[]>([]);
+  const [allMembers, setAllMembers] = useState<Player[]>([]);
   const [selectedMemberIds, setSelectedMemberId] = useState<string[] | undefined>(undefined);
   const [isSearching, setIsSearching] = useState(false);
 
@@ -46,22 +47,30 @@ function NewSessionModal({ opened, onClose, table, onSessionCreated }: NewSessio
   const { t } = useTranslation()
 
   useEffect(() => {
+    getAllPlayers()
+      .then((players) => {
+        console.log(players)
+        setAllMembers(players)
+        setMemberOptions(players)
+      })
+  }, [])
+
+  useEffect(() => {
     if (!debouncedSearch.trim()) {
-      setMemberOptions([]);
+      setMemberOptions(allMembers);
       return;
     }
     setIsSearching(true);
     searchPlayers(debouncedSearch)
       .then(setMemberOptions)
       .finally(() => setIsSearching(false));
-  }, [debouncedSearch]);
-
+  }, [debouncedSearch, allMembers]);
 
   const resetForm = () => {
     setPlayerCount(null);
     setGameType(DEFAULT_GAME_TYPE);
     setMemberSearch('');
-    setMemberOptions([]);
+    setMemberOptions(allMembers);
     setSelectedMemberId(undefined);
   };
 
