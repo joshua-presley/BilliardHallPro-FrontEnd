@@ -9,6 +9,7 @@ import { getTables } from '../api/table';
 import NewSessionModal from '../components/NewSessionModal';
 import { formatStartTime } from '../helpers/formatHelpers';
 import { useTranslation } from 'react-i18next';
+import CloseSessionModal from '../components/CloseSessionModal';
 
 type SidebarSection = 'tables' | 'playerQueue';
 
@@ -25,6 +26,7 @@ function OverviewScreen() {
   const [isLoading, setIsLoading] = useState(false)
   const [tables, setTables] = useState<Table[]>([])
   const [newSessionModalOpen, setNewSessionModalOpen] = useState(false);
+  const [closeSessionModalOpen, setCloseSessionModalOpen] = useState(false);
 
   const navigate = useNavigate()
   const { t } = useTranslation()
@@ -150,6 +152,9 @@ function OverviewScreen() {
                 <Text>
                   <strong>{t("OverviewScreen.Rate")}:</strong> ${selectedTable.current_session.rate}/hr
                 </Text>
+                <Button mt="md" color="red" onClick={() => setCloseSessionModalOpen(true)}>
+                  {t("OverviewScreen.CloseSession")}
+                </Button>
               </>
             ): (
               <Button mt="md" onClick={() => setNewSessionModalOpen(true)}>
@@ -168,6 +173,18 @@ function OverviewScreen() {
           onSessionCreated={(updatedTable) => {
             handleSessionCreated(updatedTable);
             setNewSessionModalOpen(false);
+          }}
+        />
+      )}
+
+      {selectedTable?.current_session && (
+        <CloseSessionModal
+          opened={closeSessionModalOpen}
+          onClose={() => setCloseSessionModalOpen(false)}
+          table={selectedTable}
+          onSessionClosed={(updatedTable) => {
+            handleSessionCreated(updatedTable); 
+            setCloseSessionModalOpen(false);
           }}
         />
       )}

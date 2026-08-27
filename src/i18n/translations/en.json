@@ -19,7 +19,8 @@
         "SessionType": "Session Type",
         "Started": "Started",
         "Rate": "Rate",
-        "NewSession": "New Session"
+        "NewSession": "New Session",
+        "CloseSession": "Close Session"
     },
     "NewSessionModal": {
         "MissingInformationTitle": "Missing Information",
