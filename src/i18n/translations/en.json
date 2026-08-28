@@ -34,5 +34,8 @@
         "MemberSearchDescription": "Search by name or member number",
         "Searching": "Searching",
         "NoMembersFound": "No members found"
+    },
+    "CloseSessionModal": {
+        "Player": "Player"
     }
 }

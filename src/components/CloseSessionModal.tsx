@@ -9,6 +9,8 @@ import type { Table } from '../types/models/Table';
 import { DISCOUNT_TYPE_OPTIONS, type Bill, type BillingMode, type Discount, type DiscountType } from '../types/billing';
 import { sendBillToPOS } from '../api/pos';
 import { closeSession } from '../api/session';
+import {v4 as uuidv4} from 'uuid';
+import { useTranslation } from 'react-i18next';
 
 interface CloseSessionModalProps {
   opened: boolean;
@@ -17,32 +19,48 @@ interface CloseSessionModalProps {
   onSessionClosed: (updatedTable: Table) => void;
 }
 
-
-function makeId(): string {
-  return Math.random().toString(36).slice(2);
-}
-
+/**
+ * This component handles closing out a game and dealing with the bills.
+ * It is opened when the user clicks 'Close Session' on the OverviewScreen.
+ */
 function CloseSessionModal({ opened, onClose, table, onSessionClosed }: CloseSessionModalProps) {
-  const session = table.current_session;
+  const session = table.current_session!; //If this were null, we'd not be able to close the session since it doesn't exist.
   const totalCharge = 0
   const attachedPlayers = session?.players ?? [];
-  const canSplit = attachedPlayers.length >= 2;
+  const canSplit = session.player_count >= 2;
 
   const [mode, setMode] = useState<BillingMode>('single');
   const [bills, setBills] = useState<Bill[]>([]);
   const [isClosing, setIsClosing] = useState(false);
   const [sendingBillId, setSendingBillId] = useState<string | null>(null);
 
+  const { t } = useTranslation()
+
   // Initialize / reset bills whenever the modal opens or the mode changes
   useEffect(() => {
     if (!opened || !session) return;
 
+    //Add in "dummy players" for billing.
+    if(attachedPlayers.length < session.player_count){
+      for(var i = attachedPlayers.length; i < session.player_count; i++) { 
+        attachedPlayers.push({
+          id: i + 1,
+          first_name: t("CloseSessionModal.Player"),
+          last_name: (i + 1).toString(),
+          phone_number: undefined as unknown as string,
+          member_number: undefined as unknown as number,
+          email: undefined as unknown as string,
+          created_at: undefined as unknown as string,
+        })
+      }
+    }
+
     if (mode === 'single') {
       setBills([
         {
-          id: makeId(),
+          id: uuidv4(),
           playerIds: attachedPlayers.map((p) => p.id),
-          lineItems: [{ id: makeId(), type: 'table_time', description: 'Table Time', amount: totalCharge }],
+          lineItems: [{ id: uuidv4(), type: 'table_time', description: 'Table Time', amount: totalCharge }],
           discounts: [],
           sentToPOS: false,
         },
@@ -51,12 +69,12 @@ function CloseSessionModal({ opened, onClose, table, onSessionClosed }: CloseSes
       // Default split: one bill per attached player, charge divided evenly by headcount.
       // NOTE: this is a headcount-proportional split of the single table charge, not
       // itemized per-player pricing — there's no per-player pricing model yet.
-      const share = totalCharge / attachedPlayers.length;
+      const share = totalCharge / session.player_count;
       setBills(
         attachedPlayers.map((player) => ({
-          id: makeId(),
+          id: uuidv4(),
           playerIds: [player.id],
-          lineItems: [{ id: makeId(), type: 'table_time', description: 'Table Time (share)', amount: share }],
+          lineItems: [{ id: uuidv4(), type: 'table_time', description: 'Table Time (share)', amount: share }],
           discounts: [],
           sentToPOS: false,
         }))
@@ -98,9 +116,9 @@ function CloseSessionModal({ opened, onClose, table, onSessionClosed }: CloseSes
     setBills((prev) => [
       ...prev,
       {
-        id: makeId(),
+        id: uuidv4(),
         playerIds: [],
-        lineItems: [{ id: makeId(), type: 'table_time', description: 'Table Time (share)', amount: 0 }],
+        lineItems: [{ id: uuidv4(), type: 'table_time', description: 'Table Time (share)', amount: 0 }],
         discounts: [],
         sentToPOS: false,
       },
@@ -113,7 +131,7 @@ function CloseSessionModal({ opened, onClose, table, onSessionClosed }: CloseSes
 
   const handleAddDiscount = (billId: string, type: DiscountType, percentOff?: number, amountOff?: number) => {
     const discount: Discount = {
-      id: makeId(),
+      id: uuidv4(),
       type,
       description: DISCOUNT_TYPE_OPTIONS.find((o) => o.value === type)?.label ?? 'Discount',
       percentOff,
@@ -153,7 +171,7 @@ function CloseSessionModal({ opened, onClose, table, onSessionClosed }: CloseSes
     if (!session) return;
     setIsClosing(true);
     try {
-      const closedSession = await closeSession(session.id);
+      await closeSession(session.id);
       onSessionClosed({ ...table, current_session: null });
       notifications.show({ color: 'green', title: 'Session closed', message: `${table.name} is now available.` });
       onClose();
