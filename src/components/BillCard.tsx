@@ -3,6 +3,7 @@ import { IconTrash } from "@tabler/icons-react";
 import { useState } from "react";
 import { type Bill, type BillingMode, DISCOUNT_TYPE_OPTIONS, type DiscountType, calculateBillTotal } from "../types/billing";
 import type { Table } from "../types/models/Table";
+import { useTranslation } from "react-i18next";
 
 interface BillCardProps {
   bill: Bill;
@@ -25,6 +26,8 @@ export function BillCard({
   const [discountPercent, setDiscountPercent] = useState<number | ''>('');
 
   const total = calculateBillTotal(bill);
+
+  const { t } = useTranslation()
 
   // Options for this bill's player select: players already in this bill, plus
   // anyone still unassigned — players assigned to *other* bills are excluded.
@@ -63,7 +66,7 @@ export function BillCard({
             LineItems here via a real item picker, once that flow exists. */}
         <Tooltip label="Bar/food tab integration coming soon">
           <Button size="xs" variant="subtle" disabled>
-            + Add Charge (Food/Bar)
+            {t("CloseSessionModal.BillCard.AddChargeFoodBar")}
           </Button>
         </Tooltip>
 
@@ -82,7 +85,7 @@ export function BillCard({
 
         <Group align="flex-end" gap="xs">
           <Select
-            label="Discount"
+            label={t("CloseSessionModal.Discount")}
             size="xs"
             data={DISCOUNT_TYPE_OPTIONS}
             value={discountType}
@@ -90,7 +93,7 @@ export function BillCard({
             style={{ flexGrow: 1 }}
           />
           <NumberInput
-            label="% off"
+            label={t("CloseSessionModal.BillCard.PercentOff")}
             size="xs"
             min={0}
             max={100}
@@ -107,7 +110,7 @@ export function BillCard({
               setDiscountPercent('');
             }}
           >
-            Add
+            {t("CloseSessionModal.BillCard.Add")}
           </Button>
         </Group>
 

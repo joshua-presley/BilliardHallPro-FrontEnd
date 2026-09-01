@@ -46,7 +46,7 @@ function CloseSessionModal({ opened, onClose, table, onSessionClosed }: CloseSes
         {
           id: uuidv4(),
           playerIds: attachedPlayers.map((p) => p.id),
-          lineItems: [{ id: uuidv4(), type: 'table_time', description: 'Table Time', amount: totalCharge }],
+          lineItems: [{ id: uuidv4(), type: 'table_time', description: t("CloseSessionModal.TableTime"), amount: totalCharge }],
           discounts: [],
           sentToPOS: false,
         },
@@ -60,7 +60,7 @@ function CloseSessionModal({ opened, onClose, table, onSessionClosed }: CloseSes
         attachedPlayers.map((player) => ({
           id: uuidv4(),
           playerIds: [player.id],
-          lineItems: [{ id: uuidv4(), type: 'table_time', description: 'Table Time (share)', amount: share }],
+          lineItems: [{ id: uuidv4(), type: 'table_time', description: t("CloseSessionModal.TableTimeShare"), amount: share }],
           discounts: [],
           sentToPOS: false,
         }))
@@ -104,7 +104,7 @@ function CloseSessionModal({ opened, onClose, table, onSessionClosed }: CloseSes
       {
         id: uuidv4(),
         playerIds: [],
-        lineItems: [{ id: uuidv4(), type: 'table_time', description: 'Table Time (share)', amount: 0 }],
+        lineItems: [{ id: uuidv4(), type: 'table_time', description: t("CloseSessionModal.TableTimeShare"), amount: 0 }],
         discounts: [],
         sentToPOS: false,
       },
@@ -119,7 +119,7 @@ function CloseSessionModal({ opened, onClose, table, onSessionClosed }: CloseSes
     const discount: Discount = {
       id: uuidv4(),
       type,
-      description: DISCOUNT_TYPE_OPTIONS.find((o) => o.value === type)?.label ?? 'Discount',
+      description: DISCOUNT_TYPE_OPTIONS.find((o) => o.value === type)?.label ?? t("CloseSessionModal.Discount"),
       percentOff,
       amountOff,
     };
@@ -144,7 +144,7 @@ function CloseSessionModal({ opened, onClose, table, onSessionClosed }: CloseSes
       await sendBillToPOS(bill);
       setBills((prev) => prev.map((b) => (b.id === billId ? { ...b, sentToPOS: true } : b)));
     } catch {
-      notifications.show({ color: 'red', title: 'POS error', message: 'Could not send bill to POS.' });
+      notifications.show({ color: 'red', title: t("CloseSessionModal.POSErrorTitle"), message: t('CloseSessionModal.POSErrorMessage') });
     } finally {
       setSendingBillId(null);
     }
@@ -159,10 +159,10 @@ function CloseSessionModal({ opened, onClose, table, onSessionClosed }: CloseSes
     try {
       await closeSession(session.id);
       onSessionClosed({ ...table, current_session: null });
-      notifications.show({ color: 'green', title: 'Session closed', message: `${table.name} is now available.` });
+      notifications.show({ color: 'green', title: t("CloseSessionModal.SessionClosedTitle"), message: t("CloseSessionModal.SessionClosedMessage", {tableName: table.name})});
       onClose();
     } catch {
-      notifications.show({ color: 'red', title: 'Error', message: 'Could not close the session.' });
+      notifications.show({ color: 'red', title: t("Common.ErrorTitle"), message: t("CloseSessionModal.SessionCloseErrorMessage")});
     } finally {
       setIsClosing(false);
     }
@@ -171,20 +171,20 @@ function CloseSessionModal({ opened, onClose, table, onSessionClosed }: CloseSes
   if (!session) return null;
 
   return (
-    <Modal opened={opened} onClose={onClose} title={`Close Session — ${table.name}`} centered size="lg">
+    <Modal opened={opened} onClose={onClose} title={t("CloseSessionModal.ModalTitle", {tableName: table.name})} centered size="lg">
       <Stack>
         <Group justify="space-between">
           <Text fw={600} size="lg">
-            Total: ${totalCharge.toFixed(2)}
+            {t("CloseSessionModal.Total", {Total: totalCharge.toFixed(2)})}
           </Text>
-          <Tooltip label={canSplit ? '' : 'Split billing requires 2+ attached players'} disabled={canSplit}>
+          <Tooltip label={canSplit ? '' : t("CloseSessionModal.SplitBillingTooltip")} disabled={canSplit}>
             <SegmentedControl
               value={mode}
               onChange={(v) => setMode(v as BillingMode)}
               disabled={!canSplit}
               data={[
-                { label: 'One Bill', value: 'single' },
-                { label: 'Separate Bills', value: 'split' },
+                { label: t("CloseSessionModal.OneBill"), value: 'single'},
+                { label: t("CloseSessionModal.SeparateBills"), value: 'split' },
               ]}
             />
           </Tooltip>
@@ -192,7 +192,7 @@ function CloseSessionModal({ opened, onClose, table, onSessionClosed }: CloseSes
 
         {mode === 'split' && unassignedPlayerIds.length > 0 && (
           <Alert color="yellow">
-            {unassignedPlayerIds.length} player(s) not yet assigned to a bill.
+            {t("CloseSessionModal.PlayersNotAssigned", {playerCount: unassignedPlayerIds.length})}
           </Alert>
         )}
 
@@ -218,7 +218,7 @@ function CloseSessionModal({ opened, onClose, table, onSessionClosed }: CloseSes
 
         {mode === 'split' && (
           <Button variant="light" leftSection={<IconPlus size={16} />} onClick={handleAddBill}>
-            Add Bill Group
+            {t("CloseSessionModal.AddBillGroup")}
           </Button>
         )}
 
@@ -226,14 +226,14 @@ function CloseSessionModal({ opened, onClose, table, onSessionClosed }: CloseSes
 
         <Group justify="flex-end">
           <Button variant="default" onClick={onClose}>
-            Cancel
+            {t("Common.Cancel")}
           </Button>
           <Tooltip
-            label={!allPlayersAssigned ? 'Assign all players to a bill first' : 'Send all bills to POS first'}
+            label={!allPlayersAssigned ? t("CloseSessionModal.AssignAllPlayersFirst") : t("CloseSessionModal.SendAllBillsToPOSFirst")}
             disabled={allBillsSent}
           >
             <Button onClick={handleFinish} loading={isClosing} disabled={!allBillsSent}>
-              Finish & Close Session
+              {t("CloseSessionModal.FinishAndClose")}
             </Button>
           </Tooltip>
         </Group>

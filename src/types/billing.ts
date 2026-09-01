@@ -37,9 +37,12 @@ export function calculateBillTotal(bill: Bill): number {
 
 export type BillingMode = 'single' | 'split';
 
+/**
+ * TODO: Figure out how to make these translation keys
+ */
 export const DISCOUNT_TYPE_OPTIONS: { value: DiscountType; label: string }[] = [
-  { value: 'member', label: 'Member Discount' },
+  { value: 'member', label: "Member Discount" },
   { value: 'senior', label: 'Senior Discount' },
-  { value: 'one_time', label: 'One-Time Discount' },
+  { value: 'one_time', label: 'One Time' },
   { value: 'other', label: 'Other' },
 ];
