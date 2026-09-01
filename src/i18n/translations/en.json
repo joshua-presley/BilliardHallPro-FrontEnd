@@ -19,7 +19,8 @@
         "SessionType": "Session Type",
         "Started": "Started",
         "Rate": "Rate",
-        "NewSession": "New Session"
+        "NewSession": "New Session",
+        "CloseSession": "Close Session"
     },
     "NewSessionModal": {
         "MissingInformationTitle": "Missing Information",
@@ -33,5 +34,37 @@
         "MemberSearchDescription": "Search by name or member number",
         "Searching": "Searching",
         "NoMembersFound": "No members found"
+    },
+    "CloseSessionModal": {
+        "Player": "Player",
+        "POSErrorTitle": "POS Error",
+        "POSErrorMessage": "Could not send bill to POS.",
+        "SessionClosedTitle": "Session Closed",
+        "SessionClosedMessage": "{{tableName}} is now available.",
+        "SessionCloseErrorMessage": "Could not close the session. Please try again.",
+        "ModalTitle": "Close Session - {{tableName}}",
+        "SplitBillingTooltip": "Split billing requires 2+ attached players",
+        "OneBill": "One Bill",
+        "SeparateBills": "Separate Bills",
+        "PlayersNotAssigned": "{{playerCount}} player(s) not yet assigned a bill.",
+        "AssignAllPlayersFirst": "Assign all players to a bill first.",
+        "SendAllBillsToPOSFirst": "Send all bills to POS first.",
+        "FinishAndClose": "Finish & Close Session",
+        "TableTime": "Table Time",
+        "TableTimeShare": "Table Time (share)",
+        "Discount": "Discount",
+        "AddBillGroup": "Add Bill Group",
+        "Total": "Total: ${{Total}}",
+        "BillCard": {
+            "AddChargeFoodBar": "+ Add Charge (Food/Bar)",
+            "PercentOff": "% off",
+            "Add": "Add"
+        }
+    },
+    "DiscountTypes": {
+        "MemberDiscount": "Member Discount",
+        "SeniorDiscount": "Senior Discount",
+        "OneTime": "One-Time Discount",
+        "Other": "Other"
     }
 }

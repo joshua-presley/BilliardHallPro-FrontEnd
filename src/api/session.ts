@@ -21,3 +21,8 @@ export async function createSession(payload: CreateSessionPayload): Promise<Tabl
     const res = await apiClient.post<TableSession>("sessions/", payload)
     return res.data
 }
+
+export async function closeSession(sessionId: number): Promise<TableSession> {
+  const res = await apiClient.post<TableSession>(`sessions/${sessionId}/close/`);
+  return res.data;
+}
