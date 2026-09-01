@@ -32,7 +32,7 @@ function LoginScreen() {
             const redirectTo = (location.state as {from?: string})?.from ?? "/"
             navigate(redirectTo, {replace: true})
         }
-        catch (err) {
+        catch (err: any) {
             if(err.response.status === 401) {
                 setError('Invalid username or password.')
             }

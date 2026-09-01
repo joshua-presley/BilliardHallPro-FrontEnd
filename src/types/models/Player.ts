@@ -5,5 +5,12 @@ export interface Player {
   phone_number: string;
   member_number: number;
   email: string;
-  created_at: string; // ISO 8601 datetime string
+  /**
+   * ISO 8601 datetime string
+   */
+  created_at: string;
+  /**
+   * Front-end only flag for when we need to do operations on the group of players but some players are not members/stored in the DB.
+   */
+  is_temporary?: boolean;
 }

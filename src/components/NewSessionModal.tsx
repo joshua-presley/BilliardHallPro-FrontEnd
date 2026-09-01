@@ -96,6 +96,22 @@ function NewSessionModal({ opened, onClose, table, onSessionCreated }: NewSessio
         player_ids: selectedMemberIds ? selectedMemberIds.map(memberId => Number(memberId)) : [],
       });
 
+      //Add in "dummy players" for billing.
+      if (session.players.length < session.player_count) {
+        for (var i = session.players.length; i < session.player_count; i++) {
+          session.players.push({
+            id: i + 1,
+            first_name: t("CloseSessionModal.Player"),
+            last_name: (i + 1).toString(),
+            phone_number: undefined as unknown as string,
+            member_number: undefined as unknown as number,
+            email: undefined as unknown as string,
+            created_at: undefined as unknown as string,
+            is_temporary: true
+          })
+        }
+      }
+
       notifications.show({
         color: 'green',
         title: t("NewSessionModal.SessionStartedTitle"),

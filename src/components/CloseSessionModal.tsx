@@ -40,21 +40,7 @@ function CloseSessionModal({ opened, onClose, table, onSessionClosed }: CloseSes
   useEffect(() => {
     if (!opened || !session) return;
 
-    //Add in "dummy players" for billing.
-    if(attachedPlayers.length < session.player_count){
-      for(var i = attachedPlayers.length; i < session.player_count; i++) { 
-        attachedPlayers.push({
-          id: i + 1,
-          first_name: t("CloseSessionModal.Player"),
-          last_name: (i + 1).toString(),
-          phone_number: undefined as unknown as string,
-          member_number: undefined as unknown as number,
-          email: undefined as unknown as string,
-          created_at: undefined as unknown as string,
-        })
-      }
-    }
-
+    
     if (mode === 'single') {
       setBills([
         {
