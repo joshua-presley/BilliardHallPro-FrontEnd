@@ -8,7 +8,6 @@ import apiClient from "./client"
 interface CreateSessionPayload { 
     table: number
     session_type: SessionType
-    rate: string
     player_count: number
     player_ids?: number[]
 }

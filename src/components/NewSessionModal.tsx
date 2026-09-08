@@ -84,14 +84,9 @@ function NewSessionModal({ opened, onClose, table, onSessionCreated }: NewSessio
 
     setIsSubmitting(true);
     try {
-      // TODO: rate should come from the table's active Schedule/TableInterval
-      // once that lookup logic is built — hardcoded placeholder for now.
-      const defaultRate = '10.00';
-
       const session = await createSession({
         table: table.id,
         session_type: gameType,
-        rate: defaultRate,
         player_count: playerCount,
         player_ids: selectedMemberIds ? selectedMemberIds.map(memberId => Number(memberId)) : [],
       });

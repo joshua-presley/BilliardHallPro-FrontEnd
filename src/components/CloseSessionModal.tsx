@@ -11,6 +11,10 @@ import { sendBillToPOS } from '../api/pos';
 import { closeSession } from '../api/session';
 import {v4 as uuidv4} from 'uuid';
 import { useTranslation } from 'react-i18next';
+import { intervalIsValidToday } from '../types/models/TableInterval';
+import { NoValidScheduleException } from '../exceptions/NoValidScheduleExpection';
+import { timeStringToDate } from '../helpers/formatHelpers';
+import { RoundToNearestFifteenMinutes } from '../helpers/math';
 
 interface CloseSessionModalProps {
   opened: boolean;
@@ -25,7 +29,6 @@ interface CloseSessionModalProps {
  */
 function CloseSessionModal({ opened, onClose, table, onSessionClosed }: CloseSessionModalProps) {
   const session = table.current_session!; //If this were null, we'd not be able to close the session since it doesn't exist.
-  const totalCharge = 0
   const attachedPlayers = session?.players ?? [];
   const canSplit = session.player_count >= 2;
 
@@ -33,6 +36,8 @@ function CloseSessionModal({ opened, onClose, table, onSessionClosed }: CloseSes
   const [bills, setBills] = useState<Bill[]>([]);
   const [isClosing, setIsClosing] = useState(false);
   const [sendingBillId, setSendingBillId] = useState<string | null>(null);
+  const [totalCharge, setTotalCharge] = useState(0)
+  const [now, _] = useState(new Date())
 
   const { t } = useTranslation()
 
@@ -40,7 +45,34 @@ function CloseSessionModal({ opened, onClose, table, onSessionClosed }: CloseSes
   useEffect(() => {
     if (!opened || !session) return;
 
-    
+    const interval = table.schedule?.intervals.find(i => 
+      intervalIsValidToday(i)
+        && timeStringToDate(i.start_time) < now
+        && timeStringToDate(i.end_time) > now)
+
+    if(!interval) { 
+      throw new NoValidScheduleException(table.name)
+    }
+
+    const rate = interval.rate
+    const hours = (now.getTime() - new Date(session.started_at).getTime()) / 60 / 1000 / 60 //MS to hours
+    const roundedHours = RoundToNearestFifteenMinutes(hours)
+
+    switch (interval.rate_type) { 
+      case(0): 
+        setTotalCharge(rate)
+        break
+      case (1): 
+        setTotalCharge(rate * session.player_count)
+        break
+      case (2): 
+        setTotalCharge(rate * roundedHours)
+        break
+      case (3):
+        setTotalCharge(rate * roundedHours * session.player_count)
+        break
+    }
+
     if (mode === 'single') {
       setBills([
         {

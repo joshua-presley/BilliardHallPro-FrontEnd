@@ -42,7 +42,6 @@ function OverviewScreen() {
       }
       finally{
         setIsLoading(false)
-        console.log(isLoading)
       }
     }
 
@@ -62,7 +61,6 @@ function OverviewScreen() {
       finally{
         setIsLoading(false)
         const redirectTo = '/login'
-        console.log("here")
         navigate(redirectTo, {replace: true})
       }
 
