@@ -13,7 +13,7 @@ import {v4 as uuidv4} from 'uuid';
 import { useTranslation } from 'react-i18next';
 import { intervalIsValidToday } from '../types/models/TableInterval';
 import { NoValidScheduleException } from '../exceptions/NoValidScheduleExpection';
-import { timeStringToDate } from '../helpers/formatHelpers';
+import { compareTimeToNow } from '../helpers/formatHelpers';
 import { RoundToNearestFifteenMinutes } from '../helpers/math';
 
 interface CloseSessionModalProps {
@@ -45,11 +45,14 @@ function CloseSessionModal({ opened, onClose, table, onSessionClosed }: CloseSes
   useEffect(() => {
     if (!opened || !session) return;
 
-    const interval = table.schedule?.intervals.find(i => 
-      intervalIsValidToday(i)
-        && timeStringToDate(i.start_time) < now
-        && timeStringToDate(i.end_time) > now)
+    const interval = table.schedule?.intervals.find(i => {
 
+      return intervalIsValidToday(i)
+        && compareTimeToNow(i.start_time, now, "lt")
+        && compareTimeToNow(i.end_time, now, "gt")
+
+    })
+      
     if(!interval) { 
       throw new NoValidScheduleException(table.name)
     }

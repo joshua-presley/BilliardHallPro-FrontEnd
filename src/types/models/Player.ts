@@ -9,8 +9,5 @@ export interface Player {
    * ISO 8601 datetime string
    */
   created_at: string;
-  /**
-   * Front-end only flag for when we need to do operations on the group of players but some players are not members/stored in the DB.
-   */
-  is_temporary?: boolean;
+  verified: boolean;
 }
