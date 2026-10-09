@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Modal, Button, Group, Stack, Text, SimpleGrid, MultiSelect } from '@mantine/core';
-import { useDebouncedValue } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
 import type { Table } from '../types/models/Table';
 import type { SessionType } from '../types/models/enums';
@@ -126,6 +125,9 @@ function NewSessionModal({ opened, onClose, table, onSessionCreated }: NewSessio
         message: t("NewSessionModal.SessionCreateErrorMessage") + "\n" + (err as Error).message,
         onClose: () => setIsSubmitting(false)
       });
+    }
+    finally{
+      setIsSubmitting(false)
     }
   };
 
