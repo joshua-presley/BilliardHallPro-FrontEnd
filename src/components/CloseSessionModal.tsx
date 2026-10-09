@@ -11,10 +11,8 @@ import { sendBillToPOS } from '../api/pos';
 import { closeSession } from '../api/session';
 import {v4 as uuidv4} from 'uuid';
 import { useTranslation } from 'react-i18next';
-import { intervalIsValidToday } from '../types/models/TableInterval';
-import { NoValidScheduleException } from '../exceptions/NoValidScheduleExpection';
-import { compareTimeToNow } from '../helpers/formatHelpers';
 import { roundToNearestFifteenMinutes } from '../helpers/math';
+import { getActiveInterval } from '../helpers/tableHelpers';
 
 interface CloseSessionModalProps {
   opened: boolean;
@@ -45,17 +43,7 @@ function CloseSessionModal({ opened, onClose, table, onSessionClosed }: CloseSes
   useEffect(() => {
     if (!opened || !session) return;
 
-    const interval = table.schedule?.intervals.find(i => {
-
-      return intervalIsValidToday(i)
-        && compareTimeToNow(i.start_time, now, "lt")
-        && compareTimeToNow(i.end_time, now, "gt")
-
-    })
-      
-    if(!interval) { 
-      throw new NoValidScheduleException(table.name)
-    }
+    const interval = getActiveInterval(table)
 
     const rate = interval.rate
     const hours = (now.getTime() - new Date(session.started_at).getTime()) / 60 / 1000 / 60 //MS to hours

@@ -66,5 +66,10 @@
         "SeniorDiscount": "Senior Discount",
         "OneTime": "One-Time Discount",
         "Other": "Other"
+    },
+    "RateTypes": { 
+        "perPerson": "/Person",
+        "perHour": "/Hour",
+        "perPersonPerHour": "/Person/Hour"
     }
 }

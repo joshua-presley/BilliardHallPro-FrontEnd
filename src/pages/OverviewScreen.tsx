@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import TableOverview from '../components/TableOverview';
 import { getTables } from '../api/table';
 import NewSessionModal from '../components/NewSessionModal';
-import { formatStartTime } from '../helpers/formatHelpers';
+import { formatStartTime, getRateDisplay } from '../helpers/formatHelpers';
 import { useTranslation } from 'react-i18next';
 import CloseSessionModal from '../components/CloseSessionModal';
 
@@ -136,8 +136,11 @@ function OverviewScreen() {
               <strong>{t("OverviewScreen.MaxPlayers")}:</strong> {selectedTable.max_players}
             </Text>
             <Text>
-              <strong>Status:</strong>{' '}
+              <strong>{t("OverviewScreen.Status")}:</strong>{' '}
               {selectedTable.current_session ? t("OverviewScreen.Occupied") : t("OverviewScreen.Available")}
+            </Text>
+            <Text>
+              <strong>{t("OverviewScreen.Rate")}:</strong> {getRateDisplay(selectedTable, t)}
             </Text>
             {selectedTable.current_session ? (
               <>
@@ -147,9 +150,7 @@ function OverviewScreen() {
                 <Text>
                   <strong>{t("OverviewScreen.Started")}:</strong> { formatStartTime(selectedTable.current_session.started_at) }
                 </Text>
-                <Text>
-                  <strong>{t("OverviewScreen.Rate")}:</strong> ${selectedTable.current_session.rate}/hr
-                </Text>
+               
                 <Button mt="md" color="red" onClick={() => setCloseSessionModalOpen(true)}>
                   {t("OverviewScreen.CloseSession")}
                 </Button>
