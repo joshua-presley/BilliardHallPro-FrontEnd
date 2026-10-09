@@ -13,8 +13,8 @@ import {v4 as uuidv4} from 'uuid';
 import { useTranslation } from 'react-i18next';
 import { intervalIsValidToday } from '../types/models/TableInterval';
 import { NoValidScheduleException } from '../exceptions/NoValidScheduleExpection';
-import { timeStringToDate } from '../helpers/formatHelpers';
-import { RoundToNearestFifteenMinutes } from '../helpers/math';
+import { compareTimeToNow } from '../helpers/formatHelpers';
+import { roundToNearestFifteenMinutes } from '../helpers/math';
 
 interface CloseSessionModalProps {
   opened: boolean;
@@ -30,7 +30,7 @@ interface CloseSessionModalProps {
 function CloseSessionModal({ opened, onClose, table, onSessionClosed }: CloseSessionModalProps) {
   const session = table.current_session!; //If this were null, we'd not be able to close the session since it doesn't exist.
   const attachedPlayers = session?.players ?? [];
-  const canSplit = session.player_count >= 2;
+  const canSplit = session.players.length >= 2;
 
   const [mode, setMode] = useState<BillingMode>('single');
   const [bills, setBills] = useState<Bill[]>([]);
@@ -45,31 +45,34 @@ function CloseSessionModal({ opened, onClose, table, onSessionClosed }: CloseSes
   useEffect(() => {
     if (!opened || !session) return;
 
-    const interval = table.schedule?.intervals.find(i => 
-      intervalIsValidToday(i)
-        && timeStringToDate(i.start_time) < now
-        && timeStringToDate(i.end_time) > now)
+    const interval = table.schedule?.intervals.find(i => {
 
+      return intervalIsValidToday(i)
+        && compareTimeToNow(i.start_time, now, "lt")
+        && compareTimeToNow(i.end_time, now, "gt")
+
+    })
+      
     if(!interval) { 
       throw new NoValidScheduleException(table.name)
     }
 
     const rate = interval.rate
     const hours = (now.getTime() - new Date(session.started_at).getTime()) / 60 / 1000 / 60 //MS to hours
-    const roundedHours = RoundToNearestFifteenMinutes(hours)
+    const roundedHours = roundToNearestFifteenMinutes(hours)
 
     switch (interval.rate_type) { 
       case(0): 
         setTotalCharge(rate)
         break
       case (1): 
-        setTotalCharge(rate * session.player_count)
+        setTotalCharge(rate * session.players.length)
         break
       case (2): 
         setTotalCharge(rate * roundedHours)
         break
       case (3):
-        setTotalCharge(rate * roundedHours * session.player_count)
+        setTotalCharge(rate * roundedHours * session.players.length)
         break
     }
 
@@ -87,7 +90,7 @@ function CloseSessionModal({ opened, onClose, table, onSessionClosed }: CloseSes
       // Default split: one bill per attached player, charge divided evenly by headcount.
       // NOTE: this is a headcount-proportional split of the single table charge, not
       // itemized per-player pricing — there's no per-player pricing model yet.
-      const share = totalCharge / session.player_count;
+      const share = totalCharge / session.players.length;
       setBills(
         attachedPlayers.map((player) => ({
           id: uuidv4(),

@@ -36,11 +36,10 @@ function NewSessionModal({ opened, onClose, table, onSessionCreated }: NewSessio
   const [gameType, setGameType] = useState<SessionType>(DEFAULT_GAME_TYPE);
 
   const [memberSearch, setMemberSearch] = useState('');
-  const [debouncedSearch] = useDebouncedValue(memberSearch, 300);
   const [memberOptions, setMemberOptions] = useState<Player[]>([]);
   const [allMembers, setAllMembers] = useState<Player[]>([]);
   const [selectedMemberIds, setSelectedMemberId] = useState<string[] | undefined>(undefined);
-  const [isSearching, setIsSearching] = useState(false);
+  const [isSearching, _] = useState(false);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -49,7 +48,6 @@ function NewSessionModal({ opened, onClose, table, onSessionCreated }: NewSessio
   useEffect(() => {
     getAllPlayers()
       .then((players) => {
-        console.log(players)
         setAllMembers(players)
         setMemberOptions(players)
       })
@@ -84,28 +82,33 @@ function NewSessionModal({ opened, onClose, table, onSessionCreated }: NewSessio
 
     setIsSubmitting(true);
     try {
+      var players: Player[] = []
+      if(selectedMemberIds !== undefined){
+         players = selectedMemberIds!.map((id) => {
+          return allMembers.find(member => member.id === Number(id))
+        }).filter(player => player !== undefined)
+      }
+
+      for (var i = selectedMemberIds?.length ?? 0; i < playerCount; i++) {
+        players.push({
+          id: i + 1,
+          first_name: t("CloseSessionModal.Player"),
+          last_name: (i + 1).toString(),
+          phone_number: undefined as unknown as string,
+          member_number: undefined as unknown as number,
+          email: undefined as unknown as string,
+          created_at: new Date().toISOString(),
+          verified: false
+        })
+      }
+      
       const session = await createSession({
         table: table.id,
         session_type: gameType,
-        player_count: playerCount,
-        player_ids: selectedMemberIds ? selectedMemberIds.map(memberId => Number(memberId)) : [],
+        players: players
       });
 
-      //Add in "dummy players" for billing.
-      if (session.players.length < session.player_count) {
-        for (var i = session.players.length; i < session.player_count; i++) {
-          session.players.push({
-            id: i + 1,
-            first_name: t("CloseSessionModal.Player"),
-            last_name: (i + 1).toString(),
-            phone_number: undefined as unknown as string,
-            member_number: undefined as unknown as number,
-            email: undefined as unknown as string,
-            created_at: undefined as unknown as string,
-            is_temporary: true
-          })
-        }
-      }
+      
 
       notifications.show({
         color: 'green',
@@ -120,7 +123,7 @@ function NewSessionModal({ opened, onClose, table, onSessionCreated }: NewSessio
       notifications.show({
         color: 'red',
         title: t("Common.ErrorTitle"),
-        message: t("NewSessionModal.SessionCreateErrorMessage"),
+        message: t("NewSessionModal.SessionCreateErrorMessage") + "\n" + (err as Error).message,
         onClose: () => setIsSubmitting(false)
       });
     }

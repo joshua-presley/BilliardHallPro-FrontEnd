@@ -1,4 +1,5 @@
 import type { SessionType } from "../types/models/enums"
+import type { Player } from "../types/models/Player"
 import type { TableSession } from "../types/models/TableSession"
 import apiClient from "./client"
 
@@ -8,8 +9,7 @@ import apiClient from "./client"
 interface CreateSessionPayload { 
     table: number
     session_type: SessionType
-    player_count: number
-    player_ids?: number[]
+    players: Player[]
 }
 
 /**
