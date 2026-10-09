@@ -36,11 +36,10 @@ function NewSessionModal({ opened, onClose, table, onSessionCreated }: NewSessio
   const [gameType, setGameType] = useState<SessionType>(DEFAULT_GAME_TYPE);
 
   const [memberSearch, setMemberSearch] = useState('');
-  const [debouncedSearch] = useDebouncedValue(memberSearch, 300);
   const [memberOptions, setMemberOptions] = useState<Player[]>([]);
   const [allMembers, setAllMembers] = useState<Player[]>([]);
   const [selectedMemberIds, setSelectedMemberId] = useState<string[] | undefined>(undefined);
-  const [isSearching, setIsSearching] = useState(false);
+  const [isSearching, _] = useState(false);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -83,11 +82,14 @@ function NewSessionModal({ opened, onClose, table, onSessionCreated }: NewSessio
 
     setIsSubmitting(true);
     try {
-      const players: Player[] = selectedMemberIds!.map((id) => {
-        return allMembers.find(member => member.id === Number(id))
-      }).filter(player => player !== undefined)
+      var players: Player[] = []
+      if(selectedMemberIds !== undefined){
+         players = selectedMemberIds!.map((id) => {
+          return allMembers.find(member => member.id === Number(id))
+        }).filter(player => player !== undefined)
+      }
 
-      for (var i = selectedMemberIds!.length; i < playerCount; i++) {
+      for (var i = selectedMemberIds?.length ?? 0; i < playerCount; i++) {
         players.push({
           id: i + 1,
           first_name: t("CloseSessionModal.Player"),
@@ -121,7 +123,7 @@ function NewSessionModal({ opened, onClose, table, onSessionCreated }: NewSessio
       notifications.show({
         color: 'red',
         title: t("Common.ErrorTitle"),
-        message: t("NewSessionModal.SessionCreateErrorMessage"),
+        message: t("NewSessionModal.SessionCreateErrorMessage") + "\n" + (err as Error).message,
         onClose: () => setIsSubmitting(false)
       });
     }

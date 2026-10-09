@@ -4,7 +4,7 @@ import { ParameterValidationException } from "../exceptions/ParameterValidationE
  * Round the given number of minutes up to the nearest 15
  * for billing predictability
  */
-export function RoundToNearestFifteenMinutes(hours: number){
+export function roundToNearestFifteenMinutes(hours: number){
     const fraction = hours - Math.floor(hours)
     return Math.floor(hours) + round(fraction)
 }

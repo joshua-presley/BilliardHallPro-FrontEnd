@@ -3,6 +3,9 @@ import type {  RateType } from "./enums";
 export interface TableInterval {
   id: number;
   schedule: number; // FK id
+  /**
+   * @see RateType
+   */
   rate_type: RateType
   /**
    * Bitwise value

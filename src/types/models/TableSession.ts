@@ -12,5 +12,4 @@ export interface TableSession {
   opened_by: number | null; // FK id to staff User, or null
   is_active: boolean;
   duration_minutes: number;
-  player_count: number;
 }
