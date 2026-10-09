@@ -65,7 +65,7 @@ function TableOverview(props: TableOverviewProps) {
           {session ? formatStartTime(session.started_at) : ''}
         </Text>
         <Text size="xs" c="dimmed">
-          {session ? getRateDisplay(props.table, t) : ''}
+          {getRateDisplay(props.table, t)}
         </Text>
       </Group>
     </Card>

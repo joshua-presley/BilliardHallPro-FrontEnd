@@ -15,6 +15,10 @@ export function formatStartTime(startedAt: string): string {
  * Returns a string display of rate information for this table based on the active schedule.
  * @param table The table to get rate information for. Will read this table's schedule. 
  * @param t Translation function
+ * @remarks The parameter T is marked as `any` because it is actually an internal type from `i88next`. 
+ * There didn't seem an easy way of importing it at the time of writing unfortunately. 
+ * BE WARY when using this method with translation because there is no type validation on this
+ * parameter.
  */
 export function getRateDisplay(table: Table, t: any): string { 
   //The below is generally not acceptable. Hooks are only supposed to be used on screens. 
