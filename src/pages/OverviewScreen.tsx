@@ -136,7 +136,7 @@ function OverviewScreen() {
               <strong>{t("OverviewScreen.MaxPlayers")}:</strong> {selectedTable.max_players}
             </Text>
             <Text>
-              <strong>{t("OverviewScreen.Status")}</strong>{' '}
+              <strong>{t("OverviewScreen.Status")}:</strong>{' '}
               {selectedTable.current_session ? t("OverviewScreen.Occupied") : t("OverviewScreen.Available")}
             </Text>
             <Text>
