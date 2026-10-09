@@ -51,7 +51,7 @@ function TableOverview(props: TableOverviewProps) {
           </Group>
         ) : (
           <Text size="sm" c="dimmed">
-            Available
+            {t("OverviewScreen.Available")}
           </Text>
         )}
       </Stack>
