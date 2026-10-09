@@ -1,7 +1,7 @@
 import { Card, Text, Group, Stack } from '@mantine/core';
 import type { Table } from '../types/models/Table';
 import PlayerBadge from './PlayerBadge';
-import { formatSessionType, formatStartTime } from '../helpers/formatHelpers';
+import { formatSessionType, formatStartTime, getRateDisplay } from '../helpers/formatHelpers';
 import { useTranslation } from 'react-i18next';
 
 interface TableOverviewProps {
@@ -36,7 +36,7 @@ function TableOverview(props: TableOverviewProps) {
         <Text fw={600}>{props.table.name}</Text>
         {session && (
           <Text size="sm" c="dimmed">
-            {session.player_count}/{props.table.max_players}
+            {session.players.length}/{props.table.max_players}
           </Text>
         )}
       </Group>
@@ -65,7 +65,7 @@ function TableOverview(props: TableOverviewProps) {
           {session ? formatStartTime(session.started_at) : ''}
         </Text>
         <Text size="xs" c="dimmed">
-          {session ? `$${session.rate}/hr` : ''}
+          {session ? getRateDisplay(props.table, t) : ''}
         </Text>
       </Group>
     </Card>
