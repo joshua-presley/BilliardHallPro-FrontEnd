@@ -10,6 +10,9 @@ import NewSessionModal from '../components/NewSessionModal';
 import { formatStartTime, getRateDisplay } from '../helpers/formatHelpers';
 import { useTranslation } from 'react-i18next';
 import CloseSessionModal from '../components/CloseSessionModal';
+import type { MenuItem } from '../types/models/menu/MenuItem';
+import type { Category } from '../types/models/menu/Category';
+import { getCategories, getMenuItems } from '../api/menu';
 
 type SidebarSection = 'tables' | 'playerQueue';
 
@@ -25,6 +28,8 @@ function OverviewScreen() {
   const [selectedTable, setSelectedTable] = useState<Table | null>(null);
   const [isLoading, setIsLoading] = useState(false)
   const [tables, setTables] = useState<Table[]>([])
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
   const [newSessionModalOpen, setNewSessionModalOpen] = useState(false);
   const [closeSessionModalOpen, setCloseSessionModalOpen] = useState(false);
 
@@ -39,6 +44,8 @@ function OverviewScreen() {
       try{
         setIsLoading(true)
         setTables(await getTables())
+        setMenuItems(await getMenuItems())
+        setCategories(await getCategories())
       }
       finally{
         setIsLoading(false)
