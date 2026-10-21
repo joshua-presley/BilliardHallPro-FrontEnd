@@ -1,4 +1,4 @@
-import type { Table } from "../types/models/Table";
+import type { Table } from "../types/models/tables/Table";
 import apiClient from "./client";
 
 /**

@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Modal, Button, Group, Stack, Text, SimpleGrid, MultiSelect } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
-import type { Table } from '../types/models/Table';
+import type { Table } from '../types/models/tables/Table';
 import type { SessionType } from '../types/models/enums';
-import type { Player } from '../types/models/Player';
+import type { Player } from '../types/models/tables/Player';
 import { getAllPlayers } from '../api/player';
 import { createSession } from '../api/session';
 import { useTranslation } from 'react-i18next';

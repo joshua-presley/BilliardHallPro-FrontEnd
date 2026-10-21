@@ -2,8 +2,8 @@ import { Card, Stack, Group, MultiSelect, ActionIcon, Tooltip, Button, Select, N
 import { IconTrash } from "@tabler/icons-react";
 import { useState } from "react";
 import { type Bill, type BillingMode, DISCOUNT_TYPE_OPTIONS, type DiscountType, calculateBillTotal } from "../types/billing";
-import type { Table } from "../types/models/Table";
 import { useTranslation } from "react-i18next";
+import type { Table } from "../types/models/tables/Table";
 
 interface BillCardProps {
   bill: Bill;

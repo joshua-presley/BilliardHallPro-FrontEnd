@@ -1,6 +1,6 @@
 import type { SessionType } from "../types/models/enums"
-import type { Player } from "../types/models/Player"
-import type { TableSession } from "../types/models/TableSession"
+import type { Player } from "../types/models/tables/Player"
+import type { TableSession } from "../types/models/tables/TableSession"
 import apiClient from "./client"
 
 /**

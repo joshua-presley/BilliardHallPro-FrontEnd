@@ -54,8 +54,7 @@ export function compareTimeToNow(timeString: string, now: Date, comparison: "lt"
   if(timeArray.length < 3) { 
     throw new ParameterValidationException("timeString must be in format \"HH:mm:ss\"", "timeString")
   }
-  console.log(timeArray)
-  console.log([now.getHours(), now.getMinutes(), now.getSeconds()])
+  
   if(comparison === "gt") {
     return Number(timeArray[0]) > now.getHours() ||
       (Number(timeArray[0]) === now.getHours() && Number(timeArray[1]) > now.getMinutes()) || 

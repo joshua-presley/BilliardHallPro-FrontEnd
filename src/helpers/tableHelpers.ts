@@ -1,6 +1,6 @@
 import { NoValidScheduleException } from "../exceptions/NoValidScheduleExpection";
-import type { Table } from "../types/models/Table";
-import { intervalIsValidToday, type TableInterval } from "../types/models/TableInterval";
+import type { Table } from "../types/models/tables/Table";
+import { intervalIsValidToday, type TableInterval } from "../types/models/tables/TableInterval";
 import { compareTimeToNow } from "./math";
 
 /**

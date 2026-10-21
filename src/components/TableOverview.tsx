@@ -1,5 +1,5 @@
 import { Card, Text, Group, Stack } from '@mantine/core';
-import type { Table } from '../types/models/Table';
+import type { Table } from '../types/models/tables/Table';
 import PlayerBadge from './PlayerBadge';
 import { formatSessionType, formatStartTime, getRateDisplay } from '../helpers/formatHelpers';
 import { useTranslation } from 'react-i18next';
