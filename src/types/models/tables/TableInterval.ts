@@ -1,4 +1,4 @@
-import type {  RateType } from "./enums";
+import type { RateType } from "../enums";
 
 export interface TableInterval {
   id: number;

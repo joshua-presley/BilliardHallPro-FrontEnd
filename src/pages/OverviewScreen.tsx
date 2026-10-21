@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { AppShell, NavLink, Title, Drawer, SimpleGrid, Text, Stack,  Button } from '@mantine/core';
-import type { Table } from '../types/models/Table';
+import type { Table } from '../types/models/tables/Table';
 import { logout } from '../api/auth';
 import { IconLogout } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';

@@ -5,7 +5,7 @@ import {
 import {  IconPlus } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { BillCard } from './BillCard';
-import type { Table } from '../types/models/Table';
+import type { Table } from '../types/models/tables/Table';
 import { DISCOUNT_TYPE_OPTIONS, type Bill, type BillingMode, type Discount, type DiscountType } from '../types/billing';
 import { sendBillToPOS } from '../api/pos';
 import { closeSession } from '../api/session';

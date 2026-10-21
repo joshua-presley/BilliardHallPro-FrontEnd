@@ -1,4 +1,5 @@
-import type { Table } from "../types/models/Table";
+import { ParameterValidationException } from "../exceptions/ParameterValidationException";
+import type { Table } from "../types/models/tables/Table";
 import { getActiveInterval } from "./tableHelpers";
 
 export function formatSessionType(sessionType: string): string {
@@ -30,5 +31,6 @@ export function getRateDisplay(table: Table, t: any): string {
     case 1: return "$" + rate.toString() + t("RateTypes.perPerson")
     case 2: return "$" + rate.toString() + t("RateTypes.perHour")
     case 3: return "$" + rate.toString() + t("RateTypes.perPersonPerHour")
+    default: throw new ParameterValidationException("Invalid Rate Type", "rate_type")
   }
 }

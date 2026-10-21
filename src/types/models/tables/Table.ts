@@ -1,4 +1,4 @@
-import type { TableType } from "./enums";
+import type { TableType } from "../enums";
 import type { Schedule } from "./Schedule";
 import type { TableSession } from "./TableSession";
 

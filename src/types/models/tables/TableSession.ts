@@ -1,4 +1,4 @@
-import type { SessionType } from "./enums";
+import type { SessionType } from "../enums";
 import type { Player } from "./Player";
 
 export interface TableSession {

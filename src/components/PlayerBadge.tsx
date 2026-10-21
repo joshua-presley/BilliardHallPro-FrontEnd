@@ -1,5 +1,5 @@
 import { Badge } from '@mantine/core';
-import type { Player } from '../types/models/Player';
+import type { Player } from '../types/models/tables/Player';
 
 interface PlayerBadgeProps {
   player: Player;
