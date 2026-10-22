@@ -13,8 +13,9 @@ import CloseSessionModal from '../components/CloseSessionModal';
 import type { MenuItem } from '../types/models/menu/MenuItem';
 import type { Category } from '../types/models/menu/Category';
 import { getCategories, getMenuItems } from '../api/menu';
+import MenuSection from '../components/MenuSection';
 
-type SidebarSection = 'tables' | 'playerQueue';
+type SidebarSection = 'tables' | 'playerQueue' | 'menu';
 
 /**
  * This screen shows an overview of the hall. It displays tables
@@ -90,6 +91,10 @@ function OverviewScreen() {
             onClick={() => setActiveSection('tables')}
           />
           <NavLink
+            label={t('Sidebar.Menu')} 
+            active={activeSection === 'menu'} 
+            onClick={() => setActiveSection('menu')} />
+          <NavLink
             label={t("OverviewScreen.PlayerQueue")}
             active={activeSection === 'playerQueue'}
             onClick={() => setActiveSection('playerQueue')}
@@ -120,7 +125,9 @@ function OverviewScreen() {
             </SimpleGrid>
           </>
         )}
-
+        {activeSection === 'menu' && (
+          <MenuSection menuItems={menuItems} categories={categories} />
+        )}
         {activeSection === 'playerQueue' && (
           <Title order={2}>{t("OverviewScreen.PlayerQueue")}</Title>
           // Placeholder — build PlayerQueue component later
