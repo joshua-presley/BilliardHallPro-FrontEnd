@@ -71,5 +71,14 @@
         "perPerson": "/Person",
         "perHour": "/Hour",
         "perPersonPerHour": "/Person/Hour"
+    },
+    "MenuSection": {
+        "Title": "Menu",
+        "SearchPlaceholder": "Search by item or category",
+        "NoItemsFound": "No menu items match your filters.",
+        "LoadError": "Could not load the menu."
+    },
+    "Sidebar": {
+        "Menu": "Menu"
     }
 }
