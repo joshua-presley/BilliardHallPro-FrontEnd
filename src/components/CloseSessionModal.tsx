@@ -6,13 +6,16 @@ import {  IconPlus } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { BillCard } from './BillCard';
 import type { Table } from '../types/models/tables/Table';
-import { DISCOUNT_TYPE_OPTIONS, type Bill, type BillingMode, type Discount, type DiscountType } from '../types/billing';
 import { sendBillToPOS } from '../api/pos';
 import { closeSession } from '../api/session';
 import {v4 as uuidv4} from 'uuid';
 import { useTranslation } from 'react-i18next';
 import { roundToNearestFifteenMinutes } from '../helpers/math';
 import { getActiveInterval } from '../helpers/tableHelpers';
+import type { Bill } from '../types/models/billing/Bill';
+import type { DiscountType, Discount } from '../types/models/billing/Discount';
+import { getSessionBills } from '../api/billing';
+import { addTableTime, calculateBillSubtotal, mergeBills, splitBills } from '../helpers/billingHelpers';
 
 interface CloseSessionModalProps {
   opened: boolean;
@@ -20,6 +23,8 @@ interface CloseSessionModalProps {
   table: Table;
   onSessionClosed: (updatedTable: Table) => void;
 }
+
+type BillingMode = 'single' | 'split'
 
 /**
  * This component handles closing out a game and dealing with the bills.
@@ -30,81 +35,75 @@ function CloseSessionModal({ opened, onClose, table, onSessionClosed }: CloseSes
   const attachedPlayers = session?.players ?? [];
   const canSplit = session.players.length >= 2;
 
-  const [mode, setMode] = useState<BillingMode>('single');
+  const [mode, setMode] = useState<BillingMode>('split');
   const [bills, setBills] = useState<Bill[]>([]);
   const [isClosing, setIsClosing] = useState(false);
   const [sendingBillId, setSendingBillId] = useState<string | null>(null);
-  const [totalCharge, setTotalCharge] = useState(0)
   const [now, _] = useState(new Date())
+  const [loading, setLoading] = useState(false)
+  const totalCharge = useMemo(() => {
+    const interval = getActiveInterval(table)
+    const rate = interval.rate
+    const hours = (now.getTime() - new Date(session.started_at).getTime()) / 60 / 1000 / 60 //MS to hours
+    const roundedHours = roundToNearestFifteenMinutes(hours)
+    switch (interval.rate_type) {
+      case (0):
+        return rate
+      case (1):
+        return rate * session.players.length
+      case (2):
+        return rate * roundedHours
+      case (3):
+        return rate * roundedHours * session.players.length
+    }
+  }, [table])
 
   const { t } = useTranslation()
 
   // Initialize / reset bills whenever the modal opens or the mode changes
   useEffect(() => {
-    if (!opened || !session) return;
+    load()
 
-    const interval = getActiveInterval(table)
+    async function load(){
+      try {
+        if (!opened || !session) return;
+        setLoading(true)
 
-    const rate = interval.rate
-    const hours = (now.getTime() - new Date(session.started_at).getTime()) / 60 / 1000 / 60 //MS to hours
-    const roundedHours = roundToNearestFifteenMinutes(hours)
+        
 
-    switch (interval.rate_type) { 
-      case(0): 
-        setTotalCharge(rate)
-        break
-      case (1): 
-        setTotalCharge(rate * session.players.length)
-        break
-      case (2): 
-        setTotalCharge(rate * roundedHours)
-        break
-      case (3):
-        setTotalCharge(rate * roundedHours * session.players.length)
-        break
+        const share = totalCharge / session.players.length;
+        await getSessionBills(session.id).then((bs) => {
+          for (const bill of bs) {
+            addTableTime(bill, share)
+            console.log(share)
+            calculateBillSubtotal(bill)
+          }
+          setBills(bs)
+        })
+      }
+      finally {
+        setLoading(false)
+      }
     }
-
-    if (mode === 'single') {
-      setBills([
-        {
-          id: uuidv4(),
-          playerIds: attachedPlayers.map((p) => p.id),
-          lineItems: [{ id: uuidv4(), type: 'table_time', description: t("CloseSessionModal.TableTime"), amount: totalCharge }],
-          discounts: [],
-          sentToPOS: false,
-        },
-      ]);
-    } else {
-      // Default split: one bill per attached player, charge divided evenly by headcount.
-      // NOTE: this is a headcount-proportional split of the single table charge, not
-      // itemized per-player pricing — there's no per-player pricing model yet.
-      const share = totalCharge / session.players.length;
-      setBills(
-        attachedPlayers.map((player) => ({
-          id: uuidv4(),
-          playerIds: [player.id],
-          lineItems: [{ id: uuidv4(), type: 'table_time', description: t("CloseSessionModal.TableTimeShare"), amount: share }],
-          discounts: [],
-          sentToPOS: false,
-        }))
-      );
-    }
-  }, [opened, mode, session?.id]);
+  }, [opened, session?.id]);
 
   const unassignedPlayerIds = useMemo(() => {
-    const assigned = new Set(bills.flatMap((b) => b.playerIds));
-    return attachedPlayers.filter((p) => !assigned.has(p.id)).map((p) => p.id);
-  }, [bills, attachedPlayers]);
+    if(!loading){
+      const assigned = new Set(bills?.flatMap((b) => b.player_ids));
+      return attachedPlayers.filter((p) => !assigned.has(p.id)).map((p) => p.id);
+    }
+    return []
+  }, [bills, attachedPlayers, loading]);
 
   const recomputeSplitShares = (updatedBills: Bill[]): Bill[] => {
-    const totalAssigned = updatedBills.reduce((sum, b) => sum + b.playerIds.length, 0);
+    const totalAssigned = updatedBills.reduce((sum, b) => sum + b.player_ids.length, 0);
     if (totalAssigned === 0) return updatedBills;
     return updatedBills.map((bill) => {
-      if (bill.playerIds.length === 0) return bill;
-      const share = (totalCharge * bill.playerIds.length) / totalAssigned;
+      if (bill.player_ids.length === 0) return bill;
+      const share = (totalCharge * bill.player_ids.length) / totalAssigned;
       return {
         ...bill,
-        lineItems: bill.lineItems.map((item) =>
+        lineItems: bill.line_items.map((item) =>
           item.type === 'table_time' ? { ...item, amount: share } : item
         ),
       };
@@ -113,25 +112,15 @@ function CloseSessionModal({ opened, onClose, table, onSessionClosed }: CloseSes
 
   const handlePlayerAssignment = (billId: string, playerIds: string[]) => {
     setBills((prev) => {
-      const numericIds = playerIds.map(Number);
       const updated = prev.map((b) =>
-        b.id === billId ? { ...b, playerIds: numericIds } : b
+        b.id === billId ? { ...b, playerIds: playerIds } : b
       );
       return recomputeSplitShares(updated);
     });
   };
 
   const handleAddBill = () => {
-    setBills((prev) => [
-      ...prev,
-      {
-        id: uuidv4(),
-        playerIds: [],
-        lineItems: [{ id: uuidv4(), type: 'table_time', description: t("CloseSessionModal.TableTimeShare"), amount: 0 }],
-        discounts: [],
-        sentToPOS: false,
-      },
-    ]);
+    
   };
 
   const handleRemoveBill = (billId: string) => {
@@ -141,10 +130,11 @@ function CloseSessionModal({ opened, onClose, table, onSessionClosed }: CloseSes
   const handleAddDiscount = (billId: string, type: DiscountType, percentOff?: number, amountOff?: number) => {
     const discount: Discount = {
       id: uuidv4(),
+      bill: billId,
       type,
-      description: DISCOUNT_TYPE_OPTIONS.find((o) => o.value === type)?.label ?? t("CloseSessionModal.Discount"),
-      percentOff,
-      amountOff,
+      description: t("CloseSessionModal.Discount"),
+      percent_off: percentOff?.toString() ?? null,
+      amount_off: amountOff?.toString() ?? null,
     };
     setBills((prev) =>
       prev.map((b) => (b.id === billId ? { ...b, discounts: [...b.discounts, discount] } : b))
@@ -173,7 +163,7 @@ function CloseSessionModal({ opened, onClose, table, onSessionClosed }: CloseSes
     }
   };
 
-  const allBillsSent = bills.length > 0 && bills.every((b) => b.sentToPOS);
+  const allBillsSent = bills?.length > 0 && bills.every((b) => !b.deleted && b.sent_to_pos);
   const allPlayersAssigned = mode === 'single' || unassignedPlayerIds.length === 0;
 
   const handleFinish = async () => {
@@ -193,8 +183,10 @@ function CloseSessionModal({ opened, onClose, table, onSessionClosed }: CloseSes
 
   if (!session) return null;
 
-  return (
-    <Modal opened={opened} onClose={onClose} title={t("CloseSessionModal.ModalTitle", {tableName: table.name})} centered size="lg">
+  return !loading 
+      && 
+      (
+      <Modal opened={opened} onClose={onClose} title={t("CloseSessionModal.ModalTitle", {tableName: table.name})} centered size="lg">
       <Stack>
         <Group justify="space-between">
           <Text fw={600} size="lg">
@@ -203,7 +195,17 @@ function CloseSessionModal({ opened, onClose, table, onSessionClosed }: CloseSes
           <Tooltip label={canSplit ? '' : t("CloseSessionModal.SplitBillingTooltip")} disabled={canSplit}>
             <SegmentedControl
               value={mode}
-              onChange={(v) => setMode(v as BillingMode)}
+              onChange={(v) => {
+                if(v === 'single'){
+                  const merged = mergeBills(bills)
+                  setBills(merged)
+                }
+                else {
+                  const split = splitBills(bills)
+                  setBills(split)
+                }
+                setMode(v as BillingMode)}
+              }
               disabled={!canSplit}
               data={[
                 { label: t("CloseSessionModal.OneBill"), value: 'single'},
@@ -222,7 +224,7 @@ function CloseSessionModal({ opened, onClose, table, onSessionClosed }: CloseSes
         <Divider />
 
         <Stack gap="md">
-          {bills.map((bill) => (
+          {bills.filter(bill => !bill.deleted).map((bill) => (
             <BillCard
               key={bill.id}
               bill={bill}
@@ -262,6 +264,6 @@ function CloseSessionModal({ opened, onClose, table, onSessionClosed }: CloseSes
         </Group>
       </Stack>
     </Modal>
-  );
+  )
 }
 export default CloseSessionModal;
