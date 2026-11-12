@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { AppShell, NavLink, Title, Drawer, SimpleGrid, Text, Stack,  Button } from '@mantine/core';
+import { AppShell, NavLink, Title, SimpleGrid,  Button } from '@mantine/core';
 import type { Table } from '../types/models/tables/Table';
 import { logout } from '../api/auth';
 import { IconLogout } from '@tabler/icons-react';
@@ -7,13 +7,13 @@ import { useNavigate } from 'react-router-dom';
 import TableOverview from '../components/TableOverview';
 import { getTables } from '../api/table';
 import NewSessionModal from '../components/NewSessionModal';
-import { formatStartTime, getRateDisplay } from '../helpers/formatHelpers';
 import { useTranslation } from 'react-i18next';
 import CloseSessionModal from '../components/CloseSessionModal';
 import type { MenuItem } from '../types/models/menu/MenuItem';
 import type { Category } from '../types/models/menu/Category';
 import { getCategories, getMenuItems } from '../api/menu';
 import MenuSection from '../components/MenuSection';
+import TableInfoDrawer from '../components/TableInfoDrawer';
 
 type SidebarSection = 'tables' | 'playerQueue' | 'menu';
 
@@ -134,50 +134,13 @@ function OverviewScreen() {
         )}
       </AppShell.Main>
 
-      <Drawer
-        opened={selectedTable !== null}
-        onClose={handleCloseDetail}
-        position="right"
-        title={selectedTable?.name ?? t("OverviewScreen.TableDetails")}
-        size="md"
-      >
-        {selectedTable && (
-          <Stack>
-            <Text>
-              <strong>{t("OverviewScreen.Type")}:</strong> {selectedTable.table_type.replace('_', ' ')}
-            </Text>
-            <Text>
-              <strong>{t("OverviewScreen.MaxPlayers")}:</strong> {selectedTable.max_players}
-            </Text>
-            <Text>
-              <strong>{t("OverviewScreen.Status")}:</strong>{' '}
-              {selectedTable.current_session ? t("OverviewScreen.Occupied") : t("OverviewScreen.Available")}
-            </Text>
-            <Text>
-              <strong>{t("OverviewScreen.Rate")}:</strong> {getRateDisplay(selectedTable, t)}
-            </Text>
-            {selectedTable.current_session ? (
-              <>
-                <Text>
-                  <strong>{t("OverviewScreen.SessionType")}:</strong> {selectedTable.current_session.session_type}
-                </Text>
-                <Text>
-                  <strong>{t("OverviewScreen.Started")}:</strong> { formatStartTime(selectedTable.current_session.started_at) }
-                </Text>
-               
-                <Button mt="md" color="red" onClick={() => setCloseSessionModalOpen(true)}>
-                  {t("OverviewScreen.CloseSession")}
-                </Button>
-              </>
-            ): (
-              <Button mt="md" onClick={() => setNewSessionModalOpen(true)}>
-                {t("OverviewScreen.NewSession")}
-              </Button>
-            )}
-          </Stack>
-        )}
-      </Drawer>
-
+      <TableInfoDrawer
+        selectedTable={selectedTable}
+        handleCloseDetail={handleCloseDetail}
+        setNewSessionModalOpen={setNewSessionModalOpen}
+        setCloseSessionModalOpen={setCloseSessionModalOpen}
+      />
+      
       {selectedTable && (
         <NewSessionModal
           opened={newSessionModalOpen}
