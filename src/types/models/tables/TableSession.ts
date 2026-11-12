@@ -2,8 +2,8 @@ import type { SessionType } from "../enums";
 import type { Player } from "./Player";
 
 export interface TableSession {
-  id: number;
-  table: number; // FK id
+  id: string;
+  table: string; // FK id
   session_type: SessionType;
   started_at: string; // ISO 8601 datetime string
   ended_at: string | null;
