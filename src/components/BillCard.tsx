@@ -1,15 +1,17 @@
 import { Card, Stack, Group, MultiSelect, ActionIcon, Tooltip, Button, Select, NumberInput, Divider, Text } from "@mantine/core";
 import { IconTrash } from "@tabler/icons-react";
 import { useState } from "react";
-import { type Bill, type BillingMode, DISCOUNT_TYPE_OPTIONS, type DiscountType, calculateBillTotal } from "../types/billing";
 import { useTranslation } from "react-i18next";
 import type { Table } from "../types/models/tables/Table";
+import type { Bill } from "../types/models/billing/Bill";
+import type { DiscountType } from "../types/models/billing/Discount";
+import {  DISCOUNT_TYPE_OPTIONS, type BillingMode } from "../helpers/billingHelpers";
 
 interface BillCardProps {
   bill: Bill;
   mode: BillingMode;
   attachedPlayers: Table['current_session'] extends null ? never : NonNullable<Table['current_session']>['players'];
-  unassignedPlayerIds: number[];
+  unassignedPlayerIds: string[];
   isSending: boolean;
   onAssignPlayers: (playerIds: string[]) => void;
   onAddDiscount: (type: DiscountType, percentOff?: number, amountOff?: number) => void;
@@ -25,14 +27,12 @@ export function BillCard({
   const [discountType, setDiscountType] = useState<DiscountType>('member');
   const [discountPercent, setDiscountPercent] = useState<number | ''>('');
 
-  const total = calculateBillTotal(bill);
-
   const { t } = useTranslation()
 
   // Options for this bill's player select: players already in this bill, plus
   // anyone still unassigned — players assigned to *other* bills are excluded.
   const availableOptions = attachedPlayers
-    .filter((p) => bill.playerIds.includes(p.id) || unassignedPlayerIds.includes(p.id))
+    .filter((p) => bill.player_ids.includes(p.id) || unassignedPlayerIds.includes(p.id))
     .map((p) => ({ value: String(p.id), label: `${p.first_name} ${p.last_name}` }));
 
   return (
@@ -43,7 +43,7 @@ export function BillCard({
             <MultiSelect
               label="Players on this bill"
               data={availableOptions}
-              value={bill.playerIds.map(String)}
+              value={bill.player_ids.map(String)}
               onChange={onAssignPlayers}
               style={{ flexGrow: 1 }}
             />
@@ -55,10 +55,10 @@ export function BillCard({
           </Group>
         )}
 
-        {bill.lineItems.map((item) => (
+        {bill.line_items.map((item) => (
           <Group key={item.id} justify="space-between">
             <Text size="sm">{item.description}</Text>
-            <Text size="sm">${item.amount.toFixed(2)}</Text>
+            <Text size="sm">${Number(item.amount).toFixed(2)}</Text>
           </Group>
         ))}
 
@@ -74,8 +74,8 @@ export function BillCard({
           <Group key={discount.id} justify="space-between">
             <Text size="sm" c="dimmed">
               {discount.description}
-              {discount.percentOff ? ` (${discount.percentOff}%)` : ''}
-              {discount.amountOff ? ` ($${discount.amountOff})` : ''}
+              {discount.percent_off ? ` (${discount.percent_off}%)` : ''}
+              {discount.amount_off ? ` ($${discount.amount_off})` : ''}
             </Text>
             <ActionIcon size="sm" color="red" variant="subtle" onClick={() => onRemoveDiscount(discount.id)}>
               <IconTrash size={14} />
@@ -117,9 +117,9 @@ export function BillCard({
         <Divider />
 
         <Group justify="space-between">
-          <Text fw={600}>Total: ${total.toFixed(2)}</Text>
-          <Button size="sm" onClick={onSendToPOS} loading={isSending} disabled={bill.sentToPOS} color={bill.sentToPOS ? 'green' : undefined}>
-            {bill.sentToPOS ? 'Sent ✓' : 'Send to POS'}
+          <Text fw={600}>Total: ${bill.subtotal}</Text>
+          <Button size="sm" onClick={onSendToPOS} loading={isSending} disabled={bill.sent_to_pos} color={bill.sent_to_pos ? 'green' : undefined}>
+            {bill.sent_to_pos ? 'Sent ✓' : 'Send to POS'}
           </Button>
         </Group>
       </Stack>

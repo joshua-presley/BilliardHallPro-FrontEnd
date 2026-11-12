@@ -7,7 +7,7 @@ interface PlayerBadgeProps {
 
 // Placeholder implementation — replace with the real PlayerBadge design later
 function PlayerBadge({ player }: PlayerBadgeProps) {
-  return <Badge variant="light">{player.first_name}</Badge>;
+  return <Badge variant="light">{player.first_name} {player.last_name}</Badge>;
 }
 
 export default PlayerBadge;

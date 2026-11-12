@@ -7,6 +7,7 @@ import type { Player } from '../types/models/tables/Player';
 import { getAllPlayers } from '../api/player';
 import { createSession } from '../api/session';
 import { useTranslation } from 'react-i18next';
+import { v4 } from 'uuid';
 
 
 interface NewSessionModalProps {
@@ -84,13 +85,13 @@ function NewSessionModal({ opened, onClose, table, onSessionCreated }: NewSessio
       var players: Player[] = []
       if(selectedMemberIds !== undefined){
          players = selectedMemberIds!.map((id) => {
-          return allMembers.find(member => member.id === Number(id))
+          return allMembers.find(member => member.id === id)
         }).filter(player => player !== undefined)
       }
 
       for (var i = selectedMemberIds?.length ?? 0; i < playerCount; i++) {
         players.push({
-          id: i + 1,
+          id: v4(),
           first_name: t("CloseSessionModal.Player"),
           last_name: (i + 1).toString(),
           phone_number: undefined as unknown as string,
