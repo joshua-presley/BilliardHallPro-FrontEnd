@@ -1,4 +1,4 @@
-import type { Bill } from '../types/billing';
+import type { Bill } from "../types/models/billing/Bill";
 
 /**
  * Placeholder for sending a finalized bill to the POS system.
