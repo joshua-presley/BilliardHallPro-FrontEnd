@@ -80,5 +80,14 @@
     },
     "Sidebar": {
         "Menu": "Menu"
+    },
+    "AddMenuItemModal": {
+        "Title": "Add Menu Item"
+    },
+    "SessionOrders": {
+        "LoadError": "Could not load orders.",
+        "AddError": "Could not add the item.",
+        "AddItem": "Add item",
+        "NoPlayers": "Add players to this session to take orders."
     }
 }
