@@ -123,7 +123,3 @@ export const DISCOUNT_TYPE_OPTIONS: { value: DiscountType; label: string }[] = [
   { value: 'other', label: 'Other' },
 ];
 
-function uuidv4(): string {
-  throw new Error("Function not implemented.");
-}
-

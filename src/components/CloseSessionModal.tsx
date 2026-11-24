@@ -1,8 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import {
-  Modal, Button, Group, Stack, Text, SegmentedControl, Divider, Tooltip, Alert,
+  Modal, Button, Group, Stack, Text, SegmentedControl, Divider, Tooltip
 } from '@mantine/core';
-import {  IconPlus } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { BillCard } from './BillCard';
 import type { Table } from '../types/models/tables/Table';
@@ -37,6 +36,7 @@ function CloseSessionModal({ opened, onClose, table, onSessionClosed }: CloseSes
 
   const [mode, setMode] = useState<BillingMode>('split');
   const [bills, setBills] = useState<Bill[]>([]);
+  const [billGroup, setBillGroup] = useState<string[]>([]);
   const [isClosing, setIsClosing] = useState(false);
   const [sendingBillId, setSendingBillId] = useState<string | null>(null);
   const [now, _] = useState(new Date())
@@ -56,21 +56,17 @@ function CloseSessionModal({ opened, onClose, table, onSessionClosed }: CloseSes
       case (3):
         return rate * roundedHours * session.players.length
     }
-  }, [table])
+  }, [table, opened])
 
   const { t } = useTranslation()
 
   // Initialize / reset bills whenever the modal opens or the mode changes
   useEffect(() => {
     load()
-
     async function load(){
       try {
         if (!opened || !session) return;
         setLoading(true)
-
-        
-
         const share = totalCharge / session.players.length;
         await getSessionBills(session.id).then((bs) => {
           for (const bill of bs) {
@@ -86,46 +82,6 @@ function CloseSessionModal({ opened, onClose, table, onSessionClosed }: CloseSes
       }
     }
   }, [opened, session?.id]);
-
-  const unassignedPlayerIds = useMemo(() => {
-    if(!loading){
-      const assigned = new Set(bills?.flatMap((b) => b.player_ids));
-      return attachedPlayers.filter((p) => !assigned.has(p.id)).map((p) => p.id);
-    }
-    return []
-  }, [bills, attachedPlayers, loading]);
-
-  const recomputeSplitShares = (updatedBills: Bill[]): Bill[] => {
-    const totalAssigned = updatedBills.reduce((sum, b) => sum + b.player_ids.length, 0);
-    if (totalAssigned === 0) return updatedBills;
-    return updatedBills.map((bill) => {
-      if (bill.player_ids.length === 0) return bill;
-      const share = (totalCharge * bill.player_ids.length) / totalAssigned;
-      return {
-        ...bill,
-        lineItems: bill.line_items.map((item) =>
-          item.type === 'table_time' ? { ...item, amount: share } : item
-        ),
-      };
-    });
-  };
-
-  const handlePlayerAssignment = (billId: string, playerIds: string[]) => {
-    setBills((prev) => {
-      const updated = prev.map((b) =>
-        b.id === billId ? { ...b, playerIds: playerIds } : b
-      );
-      return recomputeSplitShares(updated);
-    });
-  };
-
-  const handleAddBill = () => {
-    
-  };
-
-  const handleRemoveBill = (billId: string) => {
-    setBills((prev) => recomputeSplitShares(prev.filter((b) => b.id !== billId)));
-  };
 
   const handleAddDiscount = (billId: string, type: DiscountType, percentOff?: number, amountOff?: number) => {
     const discount: Discount = {
@@ -155,16 +111,39 @@ function CloseSessionModal({ opened, onClose, table, onSessionClosed }: CloseSes
     setSendingBillId(billId);
     try {
       await sendBillToPOS(bill);
-      setBills((prev) => prev.map((b) => (b.id === billId ? { ...b, sentToPOS: true } : b)));
+      setBills((prev) => prev.map((b) => {
+        if(b.id === billId){
+          b.sent_to_pos = true
+        }
+        return b
+      }))
     } catch {
       notifications.show({ color: 'red', title: t("CloseSessionModal.POSErrorTitle"), message: t('CloseSessionModal.POSErrorMessage') });
     } finally {
       setSendingBillId(null);
+      
     }
   };
 
-  const allBillsSent = bills?.length > 0 && bills.every((b) => !b.deleted && b.sent_to_pos);
-  const allPlayersAssigned = mode === 'single' || unassignedPlayerIds.length === 0;
+  /**
+   * Toggle whether a selected bill is in a grouping.
+   * @param billId ID of the bill clicked. 
+   * @remarks Bills in a group will send to POS at the same time.
+   */
+  const handleToggleGrouping = (billId: string) => {
+    if(billGroup.includes(billId)){
+      setBillGroup((prev) =>{ 
+        prev = prev.filter(p => p !== billId)
+        return prev
+      })
+    }
+    else { 
+      setBillGroup((prev) => {
+        const next = [...prev, billId]
+        return next
+      }) 
+    }
+  }
 
   const handleFinish = async () => {
     if (!session) return;
@@ -180,6 +159,8 @@ function CloseSessionModal({ opened, onClose, table, onSessionClosed }: CloseSes
       setIsClosing(false);
     }
   };
+
+  const allBillsSent = bills?.length > 0 && bills.every((b) => !b.deleted ? b.sent_to_pos : true)
 
   if (!session) return null;
 
@@ -215,12 +196,6 @@ function CloseSessionModal({ opened, onClose, table, onSessionClosed }: CloseSes
           </Tooltip>
         </Group>
 
-        {mode === 'split' && unassignedPlayerIds.length > 0 && (
-          <Alert color="yellow">
-            {t("CloseSessionModal.PlayersNotAssigned", {playerCount: unassignedPlayerIds.length})}
-          </Alert>
-        )}
-
         <Divider />
 
         <Stack gap="md">
@@ -229,32 +204,23 @@ function CloseSessionModal({ opened, onClose, table, onSessionClosed }: CloseSes
               key={bill.id}
               bill={bill}
               mode={mode}
-              attachedPlayers={attachedPlayers}
-              unassignedPlayerIds={unassignedPlayerIds}
+              attachedPlayers={attachedPlayers.filter(p => bill.player_ids.some(pid => pid === p.id))}
               isSending={sendingBillId === bill.id}
-              onAssignPlayers={(ids) => handlePlayerAssignment(bill.id, ids)}
+              isInGroup={billGroup.includes(bill.id)}
               onAddDiscount={(type, pct, amt) => handleAddDiscount(bill.id, type, pct, amt)}
               onRemoveDiscount={(discountId) => handleRemoveDiscount(bill.id, discountId)}
+              onAddToGroup={() => handleToggleGrouping(bill.id)}
               onSendToPOS={() => handleSendToPOS(bill.id)}
-              onRemoveBill={mode === 'split' && bills.length > 1 ? () => handleRemoveBill(bill.id) : undefined}
             />
           ))}
         </Stack>
-
-        {mode === 'split' && (
-          <Button variant="light" leftSection={<IconPlus size={16} />} onClick={handleAddBill}>
-            {t("CloseSessionModal.AddBillGroup")}
-          </Button>
-        )}
-
-        <Divider />
 
         <Group justify="flex-end">
           <Button variant="default" onClick={onClose}>
             {t("Common.Cancel")}
           </Button>
           <Tooltip
-            label={!allPlayersAssigned ? t("CloseSessionModal.AssignAllPlayersFirst") : t("CloseSessionModal.SendAllBillsToPOSFirst")}
+            label={t("CloseSessionModal.SendAllBillsToPOSFirst")}
             disabled={allBillsSent}
           >
             <Button onClick={handleFinish} loading={isClosing} disabled={!allBillsSent}>

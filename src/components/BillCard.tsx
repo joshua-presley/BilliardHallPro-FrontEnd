@@ -1,4 +1,4 @@
-import { Card, Stack, Group, MultiSelect, ActionIcon, Tooltip, Button, Select, NumberInput, Divider, Text } from "@mantine/core";
+import { Card, Stack, Group, ActionIcon, Tooltip, Button, Select, NumberInput, Divider, Text, Textarea } from "@mantine/core";
 import { IconTrash } from "@tabler/icons-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -11,47 +11,28 @@ interface BillCardProps {
   bill: Bill;
   mode: BillingMode;
   attachedPlayers: Table['current_session'] extends null ? never : NonNullable<Table['current_session']>['players'];
-  unassignedPlayerIds: string[];
   isSending: boolean;
-  onAssignPlayers: (playerIds: string[]) => void;
+  isInGroup: boolean;
   onAddDiscount: (type: DiscountType, percentOff?: number, amountOff?: number) => void;
   onRemoveDiscount: (discountId: string) => void;
   onSendToPOS: () => void;
-  onRemoveBill?: () => void;
+  onAddToGroup: () => void;
 }
 
 export function BillCard({
-  bill, mode, attachedPlayers, unassignedPlayerIds, isSending,
-  onAssignPlayers, onAddDiscount, onRemoveDiscount, onSendToPOS, onRemoveBill,
+  bill, mode, attachedPlayers, isSending, isInGroup, onAddDiscount, onRemoveDiscount, onSendToPOS, onAddToGroup
 }: BillCardProps) {
   const [discountType, setDiscountType] = useState<DiscountType>('member');
   const [discountPercent, setDiscountPercent] = useState<number | ''>('');
 
   const { t } = useTranslation()
 
-  // Options for this bill's player select: players already in this bill, plus
-  // anyone still unassigned — players assigned to *other* bills are excluded.
-  const availableOptions = attachedPlayers
-    .filter((p) => bill.player_ids.includes(p.id) || unassignedPlayerIds.includes(p.id))
-    .map((p) => ({ value: String(p.id), label: `${p.first_name} ${p.last_name}` }));
-
   return (
     <Card withBorder padding="md">
       <Stack gap="xs">
         {mode === 'split' && (
           <Group justify="space-between" align="flex-end">
-            <MultiSelect
-              label="Players on this bill"
-              data={availableOptions}
-              value={bill.player_ids.map(String)}
-              onChange={onAssignPlayers}
-              style={{ flexGrow: 1 }}
-            />
-            {onRemoveBill && (
-              <ActionIcon color="red" variant="subtle" onClick={onRemoveBill}>
-                <IconTrash size={16} />
-              </ActionIcon>
-            )}
+            <Text>{attachedPlayers.map(p => p.first_name + " " + p.last_name)}</Text>
           </Group>
         )}
 
@@ -118,9 +99,17 @@ export function BillCard({
 
         <Group justify="space-between">
           <Text fw={600}>Total: ${bill.subtotal}</Text>
-          <Button size="sm" onClick={onSendToPOS} loading={isSending} disabled={bill.sent_to_pos} color={bill.sent_to_pos ? 'green' : undefined}>
-            {bill.sent_to_pos ? 'Sent ✓' : 'Send to POS'}
-          </Button>
+          <Group justify="left">
+            <Button 
+              size="sm" 
+              onClick={onAddToGroup} 
+              loading={isSending} 
+              disabled={bill.sent_to_pos} 
+              color={bill.sent_to_pos ? 'green' : undefined}>{isInGroup ? "Remove from group" : "Add to group"}</Button>
+            <Button size="sm" onClick={onSendToPOS} loading={isSending} disabled={bill.sent_to_pos} color={bill.sent_to_pos ? 'green' : undefined}>
+              {bill.sent_to_pos ? 'Sent ✓' : 'Send to POS'}
+            </Button>
+          </Group>
         </Group>
       </Stack>
     </Card>
