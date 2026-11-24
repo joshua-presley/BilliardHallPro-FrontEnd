@@ -7,7 +7,7 @@ import apiClient from "./client"
  * API payload for creating a session.
  */
 interface CreateSessionPayload { 
-    table: number
+    table: string 
     session_type: SessionType
     players: Player[]
 }
@@ -21,7 +21,7 @@ export async function createSession(payload: CreateSessionPayload): Promise<Tabl
     return res.data
 }
 
-export async function closeSession(sessionId: number): Promise<TableSession> {
+export async function closeSession(sessionId: string): Promise<TableSession> {
   const res = await apiClient.post<TableSession>(`sessions/${sessionId}/close/`);
   return res.data;
 }

@@ -1,7 +1,7 @@
 import type { TableInterval } from "./TableInterval";
 
 export interface Schedule {
-  id: number;
+  id: string;
   name: string;
   intervals: TableInterval[];
   created_at: string;

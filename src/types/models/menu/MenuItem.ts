@@ -4,7 +4,7 @@ import type { Category } from "./Category"
  * Represents something a player can order from the kitchen or bar.
  */
 export interface MenuItem { 
-    id: number
+    id: string
     name: string
     price: number
     category: Category

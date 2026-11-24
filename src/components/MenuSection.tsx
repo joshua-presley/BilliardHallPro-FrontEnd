@@ -16,9 +16,9 @@ interface MenuSectionProps {
 function MenuSection({ menuItems, categories }: MenuSectionProps) {
   const { t } = useTranslation();
   const [search, setSearch] = useState('');
-  const [selectedCategoryIds, setSelectedCategoryIds] = useState<number[]>([]);
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
 
-  const toggleCategory = (categoryId: number) => {
+  const toggleCategory = (categoryId: string) => {
     setSelectedCategoryIds((prev) =>
       prev.includes(categoryId)
         ? prev.filter((id) => id !== categoryId)

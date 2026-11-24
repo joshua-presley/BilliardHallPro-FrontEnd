@@ -1,8 +1,8 @@
 import type { RateType } from "../enums";
 
 export interface TableInterval {
-  id: number;
-  schedule: number; // FK id
+  id: string;
+  schedule: string; // FK id
   /**
    * @see RateType
    */

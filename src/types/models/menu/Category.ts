@@ -3,6 +3,6 @@
  * E.x. "Food", "Drink".
  */
 export interface Category { 
-    id: number
+    id: string 
     category_name: string
 }
